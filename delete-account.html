@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eliminar cuenta | Match Connect</title>
+  <meta name="description" content="Solicitud de eliminación de cuenta y datos - Match Connect">
+  <style>
+    :root{
+      --bg:#F7F9FC; --card:#fff; --text:#0F172A; --muted:#64748B;
+      --border:#E6EDF5; --navy:#192236; --cyan:#29A9E1; --shadow:0 10px 30px rgba(15,23,42,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, rgba(41,169,225,.10), transparent 30%), var(--bg);
+      color:var(--text);
+      line-height:1.55;
+    }
+    .wrap{max-width:920px;margin:0 auto;padding:28px 16px 48px}
+    header{
+      background: radial-gradient(1200px 400px at 10% 0%, rgba(41,169,225,.18), transparent 60%),
+                  radial-gradient(900px 350px at 95% 0%, rgba(25,34,54,.16), transparent 55%);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px 18px;
+    }
+    h1{margin:0;color:var(--navy);font-size:22px}
+    p{font-size:14px}
+    .muted{color:var(--muted)}
+    main{
+      margin-top:14px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .btn{
+      display:inline-block;
+      padding:10px 16px;
+      border-radius:12px;
+      background:var(--cyan);
+      color:#fff;
+      text-decoration:none;
+      font-weight:700;
+    }
+    .btn:active{transform:translateY(1px)}
+    .box{
+      margin:12px 0;
+      padding:12px;
+      border-radius:14px;
+      background: rgba(25,34,54,.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    ul{padding-left:18px;margin:10px 0}
+    a{color:var(--cyan);text-decoration:none}
+    a:hover{text-decoration:underline}
+    footer{margin-top:16px;color:var(--muted);font-size:12px;text-align:center}
+    code{background:rgba(15,23,42,.06); padding:2px 6px; border-radius:8px; border:1px solid var(--border); font-size:12px}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Solicitud de eliminación de cuenta</h1>
+      <p class="muted" style="margin:6px 0 0;">
+        Match Connect / DigiPadel
+      </p>
+    </header>
+
+    <main>
+      <p>
+        Si deseas eliminar tu cuenta y los datos asociados, puedes solicitarlo usando cualquiera de estos métodos:
+      </p>
+
+      <h2 style="font-size:16px;color:var(--navy);margin:18px 0 8px;">Opción A: Desde la app</h2>
+      <p class="muted" style="margin-top:0;">
+        Ve a <strong>Perfil → Configuración → Eliminar cuenta</strong> (si está disponible).
+      </p>
+
+      <h2 style="font-size:16px;color:var(--navy);margin:18px 0 8px;">Opción B: Por correo</h2>
+      <p class="muted" style="margin-top:0;">
+        Envía un correo a <strong>soporte@matchconnect.cl</strong> indicando:
+      </p>
+      <ul>
+        <li>El <strong>correo</strong> con el que te registraste en la app</li>
+        <li>Asunto sugerido: <code>Eliminar cuenta</code></li>
+      </ul>
+
+      <p style="margin:14px 0;">
+        <a class="btn" href="mailto:soporte@matchconnect.cl?subject=Eliminar%20cuenta%20-%20Match%20Connect&body=Hola%2C%20quiero%20solicitar%20la%20eliminaci%C3%B3n%20de%20mi%20cuenta.%0A%0ACorreo%20registrado%3A%20%5Btu%20correo%5D%0A%0AGracias.">
+          Enviar solicitud por correo
+        </a>
+      </p>
+
+      <div class="box">
+        <strong>¿Qué datos se eliminan?</strong>
+        <ul>
+          <li>Datos de perfil (correo, nombre, teléfono, posición, etc. si aplica).</li>
+          <li>Datos asociados a tu cuenta dentro de la app (por ejemplo, torneos/partidos creados por ti, cuando aplique).</li>
+          <li>Estadísticas asociadas a tu perfil (cuando aplique).</li>
+        </ul>
+        <p style="margin:8px 0 0;">
+          La eliminación se realiza de forma permanente en un plazo máximo de <strong>30 días</strong>,
+          salvo obligación legal de conservar cierta información.
+        </p>
+      </div>
+
+      <p class="muted">
+        Si tienes problemas con el enlace de correo, escribe manualmente a <strong>soporte@matchconnect.cl</strong>.
+      </p>
+
+      <footer>
+        © <span id="y"></span> Match Connect
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
