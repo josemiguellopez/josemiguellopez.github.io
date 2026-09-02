@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>CADLint AI — Revisión inteligente de planos CAD</title>
+<style>
+:root{
+  --bg:#07111f;
+  --panel:#0d1a2b;
+  --panel2:#101f33;
+  --soft:#14243a;
+  --line:#223753;
+  --text:#f4f7fb;
+  --muted:#91a3ba;
+  --cyan:#3dd9d0;
+  --cyan2:#52a9ff;
+  --orange:#ffb454;
+  --red:#ff6b6b;
+  --green:#5ee0a0;
+  --shadow:0 28px 80px rgba(0,0,0,.32);
+  --radius:28px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+  radial-gradient(circle at top right, rgba(82,169,255,.12), transparent 28%),
+  radial-gradient(circle at bottom left, rgba(61,217,208,.09), transparent 30%),
+  var(--bg);
+  color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  overflow-x:hidden;
+}
+button{font:inherit}
+.app{min-height:100vh}
+.topbar{
+  position:fixed;z-index:30;top:0;left:0;right:0;height:66px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;background:rgba(7,17,31,.78);backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,255,255,.06)
+}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.02em}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));display:grid;place-items:center;color:#03101a;font-weight:900}
+.brand small{display:block;color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.progress{font-size:13px;color:var(--muted)}
+.slides{padding-top:66px}
+.slide{
+  min-height:calc(100vh - 66px);
+  display:none;align-items:center;justify-content:center;
+  padding:40px 28px 90px;
+}
+.slide.active{display:flex}
+.wrap{width:min(1180px,100%);margin:auto}
+.eyebrow{color:var(--cyan);font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(44px,7vw,84px);line-height:.94;letter-spacing:-.055em;margin-bottom:22px}
+h2{font-size:clamp(34px,5vw,62px);line-height:1;letter-spacing:-.04em;margin-bottom:18px}
+h3{font-size:19px;margin-bottom:8px}
+.lead{font-size:clamp(18px,2.1vw,25px);line-height:1.5;color:#c2cedc;max-width:850px}
+.grid2{display:grid;grid-template-columns:1.02fr .98fr;gap:34px;align-items:center}
+.card{
+  background:linear-gradient(180deg,rgba(18,35,57,.94),rgba(10,24,41,.95));
+  border:1px solid rgba(255,255,255,.075);box-shadow:var(--shadow);border-radius:var(--radius)
+}
+.heroCard{padding:18px}
+.cad-window{overflow:hidden;border-radius:22px;background:#07121f;border:1px solid #20344d}
+.cad-top{height:42px;background:#111f31;border-bottom:1px solid #263c56;display:flex;align-items:center;padding:0 14px;gap:7px}
+.dot{width:9px;height:9px;border-radius:50%;background:#42546b}.dot:nth-child(1){background:#ff6b6b}.dot:nth-child(2){background:#ffbe63}.dot:nth-child(3){background:#52d996}
+.cad-body{display:grid;grid-template-columns:1fr 320px;min-height:460px}
+.canvas{
+  position:relative;overflow:hidden;
+  background:
+   linear-gradient(rgba(51,97,136,.12) 1px, transparent 1px),
+   linear-gradient(90deg,rgba(51,97,136,.12) 1px, transparent 1px),
+   #081521;background-size:22px 22px;
+}
+.plan{position:absolute;inset:48px}
+.wall,.line,.door,.label,.dim{position:absolute}
+.wall{border:2px solid #88a9c2;background:rgba(91,128,156,.06)}
+.w1{left:7%;top:10%;width:70%;height:4%}.w2{left:7%;top:10%;width:4%;height:68%}.w3{left:7%;top:74%;width:70%;height:4%}.w4{left:73%;top:10%;width:4%;height:68%}
+.w5{left:36%;top:12%;width:3%;height:62%}.w6{left:39%;top:43%;width:34%;height:3%}
+.door{width:42px;height:42px;border-left:2px solid var(--cyan);border-bottom:2px solid var(--cyan);border-radius:0 0 0 100%;transform:rotate(-6deg)}
+.d1{left:33%;top:55%}.d2{left:71%;top:31%}
+.err{position:absolute;border:2px solid var(--red);border-radius:11px;box-shadow:0 0 0 5px rgba(255,107,107,.1)}
+.e1{left:29%;top:50%;width:62px;height:62px}
+.note{position:absolute;left:52%;top:18%;padding:6px 9px;border-radius:8px;background:#0b3140;color:#68eee7;font-size:11px}
+.ai-panel{background:#0d1b2b;border-left:1px solid #223753;padding:16px}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.score{display:flex;align-items:end;gap:8px;margin-bottom:15px}.score b{font-size:42px;letter-spacing:-.06em}.score span{color:var(--muted);padding-bottom:7px}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{padding:10px;border-radius:13px;background:#132439;font-size:11px;color:var(--muted)}.stat b{display:block;font-size:18px;color:white;margin-bottom:3px}
+.issue{padding:12px;background:#122238;border:1px solid #253c57;border-radius:14px;margin-top:9px}
+.issue .sev{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.issue p{font-size:12px;color:#c1ccda;margin:7px 0 10px;line-height:1.35}
+.actions{display:flex;gap:7px}.btn{border:0;border-radius:9px;padding:7px 9px;font-size:10px;font-weight:800;background:#1b3047;color:#dce7f4}.btn.primary{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#03111b}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.kpi{padding:20px}.kpi b{font-size:28px;display:block;margin-bottom:4px}.kpi span{color:var(--muted);font-size:13px}
+.problem-grid,.benefit-grid,.checks,.flow,.pricing{display:grid;gap:18px}
+.problem-grid{grid-template-columns:repeat(3,1fr);margin-top:32px}
+.problem,.benefit,.check,.price{padding:26px}
+.icon{width:44px;height:44px;border-radius:14px;background:#13273d;display:grid;place-items:center;margin-bottom:18px;font-size:21px}
+.problem p,.benefit p,.check p,.price p{color:var(--muted);line-height:1.5;font-size:14px}
+.quote{font-size:clamp(25px,4vw,46px);line-height:1.15;letter-spacing:-.035em;max-width:920px}
+.quote strong{color:var(--cyan)}
+.flow{grid-template-columns:repeat(5,1fr);margin-top:36px}
+.step{position:relative;padding:22px 18px;text-align:center}.step .n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#06121d;font-weight:900;margin:0 auto 14px}.step span{font-size:13px;color:var(--muted)}
+.checks{grid-template-columns:repeat(2,1fr);margin-top:26px}
+.check{display:flex;gap:16px;align-items:flex-start}.check .icon{flex:0 0 auto;margin:0}
+.check strong{display:block;margin-bottom:4px}
+.mock-full{padding:18px;margin-top:28px}
+.review-header{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:8px 6px 20px}
+.score-ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--cyan) 0 85%,#20334a 85% 100%);position:relative}
+.score-ring:after{content:"";position:absolute;width:70px;height:70px;border-radius:50%;background:#0e1b2c}
+.score-ring b{z-index:2;font-size:22px}
+.issue-table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px}
+.issue-table th,.issue-table td{padding:14px 12px;border-bottom:1px solid #22364f;text-align:left;font-size:13px}
+.issue-table th{color:#7f94ac;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.badge{padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800}.critical{background:rgba(255,107,107,.13);color:#ff8a8a}.warning{background:rgba(255,180,84,.12);color:#ffc777}.ok{background:rgba(94,224,160,.12);color:#81e8b3}
+.pricing{grid-template-columns:repeat(3,1fr);margin-top:30px}.price.featured{outline:1px solid var(--cyan);transform:translateY(-8px)}.price h3{font-size:23px}.price .big{font-size:35px;font-weight:900;margin:14px 0 8px}.price ul{padding-left:18px;color:#b8c5d4;line-height:1.8}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:34px}
+.nav{
+ position:fixed;z-index:40;bottom:20px;left:50%;transform:translateX(-50%);
+ display:flex;gap:10px;background:rgba(9,20,34,.86);backdrop-filter:blur(14px);
+ border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:8px;box-shadow:0 18px 50px rgba(0,0,0,.3)
+}
+.nav button{border:0;border-radius:999px;padding:10px 16px;background:#14263b;color:#dce7f3;cursor:pointer;font-weight:800}
+.nav button.primary{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#04111a}
+.dots{display:flex;gap:6px;align-items:center;padding:0 6px}.dots i{width:7px;height:7px;border-radius:50%;background:#354b64}.dots i.active{background:var(--cyan);width:19px;border-radius:99px}
+.mobile-tag{display:inline-flex;padding:7px 11px;border:1px solid #25425c;border-radius:999px;color:#9fc3dc;font-size:12px;margin-top:10px}
+@media(max-width:850px){
+ .topbar{height:58px;padding:0 15px}.brand small{display:none}.slides{padding-top:58px}.slide{min-height:calc(100vh - 58px);padding:28px 16px 92px;align-items:flex-start}
+ .grid2{grid-template-columns:1fr}.hero-copy{padding-top:20px}
+ h1{font-size:47px}.lead{font-size:18px}
+ .cad-body{grid-template-columns:1fr}.ai-panel{border-left:0;border-top:1px solid #223753}.canvas{min-height:320px}.cad-body{min-height:auto}
+ .problem-grid,.benefit-grid,.pricing{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.checks{grid-template-columns:1fr}
+ .kpis{grid-template-columns:1fr}.review-header{align-items:flex-start;flex-direction:column}.issue-table{display:block;overflow-x:auto;white-space:nowrap}
+ .cta{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:520px){
+ .cad-body{display:block}.canvas{min-height:260px}.ai-panel{padding:12px}.mini{grid-template-columns:repeat(3,1fr)}
+ .flow{grid-template-columns:1fr}.nav{bottom:10px}.nav button{padding:9px 12px;font-size:12px}.progress{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand"><div class="logo">C</div><div>CADLint AI<small>Concept Presentation</small></div></div>
+    <div class="progress" id="progress">1 / 8</div>
+  </div>
+
+  <main class="slides">
+    <section class="slide active">
+      <div class="wrap grid2">
+        <div class="hero-copy">
+          <div class="eyebrow">Agente inteligente para AutoCAD</div>
+          <h1>Revisión de planos, <span style="color:var(--cyan)">antes del error.</span></h1>
+          <p class="lead">CADLint AI analiza el dibujo, detecta inconsistencias, encuentra desviaciones de estándar y guía al ingeniero directamente hacia el problema.</p>
+          <span class="mobile-tag">Pensado para ingeniería • arquitectura • electricidad • MEP</span>
+          <div class="kpis">
+            <div class="card kpi"><b>1 clic</b><span>para iniciar una revisión completa</span></div>
+            <div class="card kpi"><b>DWG nativo</b><span>analiza objetos, capas, bloques y cotas</span></div>
+            <div class="card kpi"><b>QA + IA</b><span>reglas deterministas con explicación inteligente</span></div>
+          </div>
+        </div>
+        <div class="card heroCard">
+          <div class="cad-window">
+            <div class="cad-top"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="cad-body">
+              <div class="canvas">
+                <div class="plan">
+                  <div class="wall w1"></div><div class="wall w2"></div><div class="wall w3"></div><div class="wall w4"></div><div class="wall w5"></div><div class="wall w6"></div>
+                  <div class="door d1"></div><div class="door d2"></div><div class="err e1"></div>
+                  <div class="note">P-23 · 720 mm</div>
+                </div>
+              </div>
+              <aside class="ai-panel">
+                <div class="panel-head"><strong>CADLint Review</strong><span class="badge ok">LIVE</span></div>
+                <div class="score"><b>85%</b><span>Quality score</span></div>
+                <div class="mini">
+                  <div class="stat"><b style="color:var(--red)">4</b>Críticos</div>
+                  <div class="stat"><b style="color:var(--orange)">7</b>Altos</div>
+                  <div class="stat"><b style="color:var(--cyan)">17</b>Warnings</div>
+                </div>
+                <div class="issue">
+                  <div class="sev" style="color:var(--red)">Crítico · DIM-004</div>
+                  <p>La cota visible no coincide con la geometría real.</p>
+                  <div class="actions"><button class="btn">Ir al objeto</button><button class="btn primary">Corregir</button></div>
+                </div>
+                <div class="issue">
+                  <div class="sev" style="color:var(--orange)">Alto · STD-018</div>
+                  <p>Puerta P-23 fuera del estándar definido.</p>
+                  <div class="actions"><button class="btn">Revisar</button></div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="wrap">
+        <div class="eyebrow">El problema</div>
+        <h2>Revisar planos sigue dependiendo demasiado del ojo humano.</h2>
+        <p class="lead">Los errores pequeños se convierten en retrabajo, consultas, correcciones de última hora y, en el peor caso, problemas en obra.</p>
+        <div class="problem-grid">
+          <div class="card problem"><div class="icon">⏱️</div><h3>Horas de revisión</h3><p>Capas, bloques, cotas, textos y estándares se revisan manualmente una y otra vez.</p></div>
+          <div class="card problem"><div class="icon">⚠️</div><h3>Errores invisibles</h3><p>Una cota incorrecta o un bloque mal clasificado puede pasar desapercibido hasta muy tarde.</p></div>
+          <div class="card problem"><div class="icon">👤</div><h3>Conocimiento disperso</h3><p>Muchos criterios de revisión viven en la experiencia del ingeniero senior y no en un sistema reutilizable.</p></div>
+        </div>
+        <div class="card cta" style="margin-top:22px">
+          <div><div class="eyebrow">Hipótesis</div><div class="quote">¿Y si pudiéramos convertir la experiencia del revisor en un <strong>motor automático de calidad?</strong></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="wrap">
+        <div class="eyebrow">La solución</div>
+        <h2>Un QA Automation para planos CAD.</h2>
+        <p class="lead">CADLint combina validaciones técnicas, estándares del proyecto e IA para encontrar problemas y explicar por qué importan.</p>
+        <div class="flow">
+          <div class="card step"><div class="n">1</div><h3>Abrir DWG</h3><span>El ingeniero trabaja como siempre.</span></div>
+          <div class="card step"><div class="n">2</div><h3>Review</h3><span>Un clic inicia el análisis.</span></div>
+          <div class="card step"><div class="n">3</div><h3>Detectar</h3><span>Reglas + contexto del proyecto.</span></div>
+          <div class="card step"><div class="n">4</div><h3>Localizar</h3><span>Zoom exacto al objeto afectado.</span></div>
+          <div class="card step"><div class="n">5</div><h3>Corregir</h3><span>Fix sugerido y revalidación.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="wrap">
+        <div class="eyebrow">Qué revisa</div>
+        <h2>Empieza con checks simples. Termina entendiendo el estándar.</h2>
+        <div class="checks">
+          <div class="card check"><div class="icon">▦</div><div><strong>Layers y propiedades</strong><p>Objetos en Layer 0, colores, lineweights, tipos de línea y naming.</p></div></div>
+          <div class="card check"><div class="icon">⌁</div><div><strong>Cotas y geometría</strong><p>Cotas inconsistentes, valores sobrescritos y diferencias contra medidas reales.</p></div></div>
+          <div class="card check"><div class="icon">◫</div><div><strong>Bloques y atributos</strong><p>Bloques explotados, atributos ausentes, versiones incorrectas y duplicados.</p></div></div>
+          <div class="card check"><div class="icon">T</div><div><strong>Texto y estilos</strong><p>Alturas, estilos, formatos, ortografía técnica y nomenclaturas.</p></div></div>
+          <div class="card check"><div class="icon">⊙</div><div><strong>Coordenadas y limpieza</strong><p>Entidades lejanas, duplicados, referencias rotas y geometrías problemáticas.</p></div></div>
+          <div class="card check"><div class="icon">⚡</div><div><strong>Reglas de disciplina</strong><p>Ejemplo eléctrico: circuitos, etiquetas, tableros, cargas y convenciones internas.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="wrap">
+        <div class="eyebrow">Experiencia de usuario</div>
+        <h2>El revisor no recibe una lista. Recibe contexto y acción.</h2>
+        <div class="card mock-full">
+          <div class="review-header">
+            <div><h3 style="font-size:25px">Planta_Electrica_Nivel_02.dwg</h3><p style="color:var(--muted);margin:0">Standard: Oficina Ingeniería v3.2 · 4.821 objetos analizados</p></div>
+            <div class="score-ring"><b>85%</b></div>
+          </div>
+          <table class="issue-table">
+            <thead><tr><th>Severidad</th><th>Regla</th><th>Hallazgo</th><th>Objeto</th><th>Acción</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge critical">Crítico</span></td><td>DIM-004</td><td>Cota 4850 no coincide con geometría 4800</td><td>Dimension #1822</td><td><button class="btn primary">Ir al objeto</button></td></tr>
+              <tr><td><span class="badge warning">Alto</span></td><td>ELE-012</td><td>Tomacorriente sin circuito asociado</td><td>Block #3341</td><td><button class="btn">Explicar</button></td></tr>
+              <tr><td><span class="badge warning">Medio</span></td><td>STD-021</td><td>17 textos usan altura fuera del estándar</td><td>MText ×17</td><td><button class="btn">Seleccionar</button></td></tr>
+              <tr><td><span class="badge ok">Auto-fix</span></td><td>LAY-006</td><td>Bloque en Layer 0; debería estar en ELE-TOMA</td><td>Block #4110</td><td><button class="btn primary">Corregir</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="wrap">
+        <div class="eyebrow">La diferencia</div>
+        <h2>No queremos “IA que mira un plano”. Queremos IA que entiende el dibujo.</h2>
+        <div class="problem-grid">
+          <div class="card benefit"><div class="icon">🧠</div><h3>Entiende objetos CAD</h3><p>Analiza entidades reales: bloques, cotas, layers, textos, geometría y atributos.</p></div>
+          <div class="card benefit"><div class="icon">📐</div><h3>Reglas verificables</h3><p>Las validaciones críticas no dependen solo de una respuesta probabilística de IA.</p></div>
+          <div class="card benefit"><div class="icon">✨</div><h3>IA donde aporta</h3><p>Prioriza, explica, correlaciona hallazgos y propone una solución comprensible.</p></div>
+        </div>
+        <div class="card cta" style="margin-top:24px">
+          <div><h3>El resultado</h3><p class="lead" style="margin:0">Menos revisión repetitiva. Más foco del ingeniero en decisiones que sí requieren experiencia.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="wrap">
+        <div class="eyebrow">Modelo de producto</div>
+        <h2>El producto aprende cómo revisa cada empresa.</h2>
+        <p class="lead">Una organización puede cargar su estándar CAD, checklist y ejemplos aprobados. CADLint convierte eso en reglas reutilizables.</p>
+        <div class="pricing">
+          <div class="card price"><h3>Starter</h3><p>Para profesionales y pequeños equipos.</p><div class="big">10 checks</div><ul><li>Revisión local</li><li>Layers, cotas, bloques</li><li>Reporte HTML/PDF</li></ul></div>
+          <div class="card price featured"><div class="eyebrow">Ideal para empresa</div><h3>Team</h3><p>Estándares compartidos y revisión centralizada.</p><div class="big">Custom Rules</div><ul><li>Reglas por proyecto</li><li>Checklist de empresa</li><li>Historial y métricas</li><li>Auto-fix controlado</li></ul></div>
+          <div class="card price"><h3>Enterprise</h3><p>QA/QC integrado al flujo de ingeniería.</p><div class="big">Pipeline</div><ul><li>Validación por lote</li><li>Integración documental</li><li>Roles y aprobación</li><li>Modelos privados</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="wrap">
+        <div class="eyebrow">Validación con un ingeniero</div>
+        <h2>Lo que necesitamos descubrir ahora.</h2>
+        <div class="checks">
+          <div class="card check"><div class="icon">1</div><div><strong>¿Qué errores revisas siempre?</strong><p>Los 5–10 problemas que aparecen una y otra vez en planos reales.</p></div></div>
+          <div class="card check"><div class="icon">2</div><div><strong>¿Qué error cuesta más?</strong><p>No necesariamente el más frecuente, sino el que más retrabajo genera.</p></div></div>
+          <div class="card check"><div class="icon">3</div><div><strong>¿Qué podría corregirse solo?</strong><p>Separar checks informativos de cambios que el sistema puede automatizar con seguridad.</p></div></div>
+          <div class="card check"><div class="icon">4</div><div><strong>¿Qué estándar usa tu empresa?</strong><p>Layers, bloques, nomenclaturas, estilos, simbología y reglas eléctricas.</p></div></div>
+          <div class="card check"><div class="icon">5</div><div><strong>¿Pagarías por esto?</strong><p>Y, más importante: ¿quién sería realmente el comprador dentro de una empresa?</p></div></div>
+          <div class="card check"><div class="icon">6</div><div><strong>¿Qué no debemos automatizar?</strong><p>Identificar decisiones donde el criterio profesional debe seguir mandando.</p></div></div>
+        </div>
+        <div class="card cta" style="margin-top:24px">
+          <div>
+            <div class="eyebrow">Objetivo del MVP</div>
+            <div class="quote">Que un ingeniero abra un DWG, pulse <strong>Review</strong> y diga: “esto me habría ahorrado trabajo hoy”.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="nav">
+    <button onclick="prev()">←</button>
+    <div class="dots" id="dots"></div>
+    <button class="primary" onclick="next()">Siguiente →</button>
+  </div>
+</div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const dots=document.getElementById('dots');
+let current=0;
+slides.forEach((_,i)=>{const d=document.createElement('i');if(i===0)d.classList.add('active');dots.appendChild(d)});
+function show(i){
+  current=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,x)=>s.classList.toggle('active',x===current));
+  [...dots.children].forEach((d,x)=>d.classList.toggle('active',x===current));
+  document.getElementById('progress').textContent=(current+1)+' / '+slides.length;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function next(){show(current+1)}
+function prev(){show(current-1)}
+document.addEventListener('keydown',e=>{
+ if(['ArrowRight','PageDown',' '].includes(e.key)) next();
+ if(['ArrowLeft','PageUp'].includes(e.key)) prev();
+});
+let sx=null;
+document.addEventListener('touchstart',e=>sx=e.changedTouches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{if(sx===null)return;let dx=e.changedTouches[0].clientX-sx;if(dx<-60)next();if(dx>60)prev();sx=null},{passive:true});
+</script>
+</body>
+</html>

@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MaterialFlow MVP — Ingeniería y Materiales</title>
+<style>
+:root{
+  --bg:#f5f7fa;
+  --surface:#ffffff;
+  --surface-2:#f9fbfd;
+  --text:#172033;
+  --muted:#66758a;
+  --line:#dfe5ec;
+  --line-strong:#cfd8e3;
+  --blue:#1769e0;
+  --blue-soft:#eaf2ff;
+  --green:#128a5a;
+  --green-soft:#eaf8f2;
+  --amber:#b26a00;
+  --amber-soft:#fff5df;
+  --red:#c63f46;
+  --red-soft:#fff0f1;
+  --shadow:0 10px 30px rgba(20,40,70,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.topbar{
+  position:sticky;top:0;z-index:30;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{
+  width:36px;height:36px;border-radius:10px;
+  display:grid;place-items:center;
+  background:var(--blue);
+  color:white;font-weight:900
+}
+.brand b{display:block;font-size:16px}
+.brand small{display:block;color:var(--muted);font-size:12px}
+.user{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+.avatar{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;background:#e9edf2;color:#334154;font-weight:800
+}
+.shell{
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  min-height:calc(100vh - 64px);
+}
+.sidebar{
+  border-right:1px solid var(--line);
+  background:#fff;
+  padding:22px 14px;
+}
+.side-title{
+  color:#8b98aa;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-weight:900;
+  padding:0 10px 10px
+}
+.nav{display:flex;flex-direction:column;gap:5px}
+.nav button{
+  border:0;background:transparent;color:#536176;
+  text-align:left;padding:11px 12px;border-radius:10px;
+  font-weight:750;display:flex;align-items:center;gap:10px
+}
+.nav button:hover,.nav button.active{
+  background:var(--blue-soft);color:var(--blue)
+}
+.nav .num{
+  width:25px;height:25px;border-radius:8px;
+  display:grid;place-items:center;background:#f0f3f7;
+  color:#6a7890;font-size:11px;font-weight:900
+}
+.nav button.active .num{background:#dfeaff;color:var(--blue)}
+.side-note{
+  margin-top:24px;padding:14px 12px;
+  border-top:1px solid var(--line);
+  color:var(--muted);font-size:12px;line-height:1.55
+}
+.side-note b{color:var(--text);display:block;margin-bottom:5px}
+.main{min-width:0}
+.content{max-width:1440px;margin:auto;padding:30px}
+.view{display:none}
+.view.active{display:block}
+.hero{margin-bottom:24px}
+.eyebrow{
+  color:var(--blue);text-transform:uppercase;letter-spacing:.12em;
+  font-size:12px;font-weight:900;margin-bottom:8px
+}
+h1,h2,h3,p{margin-top:0}
+h1{
+  font-size:clamp(34px,5vw,56px);
+  line-height:1;letter-spacing:-.045em;margin-bottom:12px
+}
+h2{
+  font-size:clamp(26px,3.4vw,38px);
+  letter-spacing:-.03em;margin-bottom:9px
+}
+h3{font-size:17px}
+.lead{max-width:860px;color:var(--muted);font-size:16px;line-height:1.6}
+.stepper{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;
+  margin:22px 0 28px
+}
+.step{
+  position:relative;padding:15px 16px;
+  border-right:1px solid var(--line)
+}
+.step:last-child{border-right:0}
+.step small{display:block;color:#8996a7;font-size:11px;margin-bottom:4px}
+.step b{font-size:13px}
+.step.active{background:var(--blue-soft)}
+.step.active b{color:var(--blue)}
+.section{
+  background:#fff;border:1px solid var(--line);border-radius:16px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px
+}
+.section-head{
+  padding:20px 22px 16px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  border-bottom:1px solid var(--line)
+}
+.section-head h3{margin-bottom:4px}
+.section-head p{margin:0;color:var(--muted);font-size:13px}
+.section-body{padding:20px 22px}
+.btn{
+  border:0;border-radius:10px;padding:10px 14px;
+  font-weight:850;background:#eef2f6;color:#344155
+}
+.btn:hover{filter:brightness(.98)}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.secondary{background:#fff;border:1px solid var(--line-strong)}
+.btn.success{background:var(--green);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.dropzone{
+  border:1.5px dashed #bfc8d5;
+  border-radius:14px;padding:26px;text-align:center;background:#fbfcfe
+}
+.dropzone strong{display:block;font-size:16px;margin-bottom:5px}
+.dropzone p{margin:0 0 14px;color:var(--muted);font-size:13px}
+.dropzone input{display:none}
+.file-list{margin-top:16px;border-top:1px solid var(--line)}
+.file-row{
+  display:grid;grid-template-columns:minmax(0,1fr) 150px 110px;
+  gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)
+}
+.file-name{font-weight:800}
+.file-meta{color:var(--muted);font-size:12px}
+.discipline{
+  display:inline-flex;padding:5px 8px;border-radius:999px;
+  background:#f1f4f8;color:#4e5d71;font-size:11px;font-weight:800
+}
+.status{
+  display:inline-flex;padding:5px 8px;border-radius:999px;
+  font-size:11px;font-weight:900
+}
+.ok{background:var(--green-soft);color:var(--green)}
+.warn{background:var(--amber-soft);color:var(--amber)}
+.bad{background:var(--red-soft);color:var(--red)}
+.info{background:var(--blue-soft);color:var(--blue)}
+.toolbar{
+  display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;
+  margin-bottom:14px
+}
+.tabs{display:flex;gap:7px;flex-wrap:wrap}
+.tab{
+  border:1px solid var(--line);background:#fff;color:#59687b;
+  border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800
+}
+.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.kpis{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;
+  margin-bottom:18px
+}
+.kpi{padding:18px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:0}
+.kpi span{display:block;color:var(--muted);font-size:12px}
+.kpi b{display:block;font-size:26px;margin-top:6px;letter-spacing:-.03em}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}
+th{
+  background:#f8fafc;color:#718094;text-transform:uppercase;
+  font-size:10px;letter-spacing:.08em
+}
+tr:last-child td{border-bottom:0}
+.code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:800;color:#1a5ea5}
+.qty{font-weight:900}
+.doc{
+  background:#fff;color:#182232;border:1px solid var(--line-strong);
+  border-radius:8px;box-shadow:0 14px 35px rgba(26,44,70,.11);
+  max-width:1080px;margin:auto;overflow:hidden
+}
+.doc-head{
+  padding:26px 28px 20px;border-bottom:2px solid #1e5ca7
+}
+.doc-title{display:flex;justify-content:space-between;gap:20px}
+.doc-title h2{margin:0;font-size:28px}
+.doc-title p{margin:7px 0 0;color:#6b798c;font-size:13px}
+.doc-code{text-align:right;color:#5f6d80;font-size:12px}
+.doc-code b{display:block;color:#152134;font-size:15px;margin-bottom:4px}
+.doc-meta{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-top:20px
+}
+.doc-meta div{border-top:1px solid #d9e0e8;padding-top:10px}
+.doc-meta span{display:block;color:#7c899a;font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+.doc-meta b{display:block;margin-top:4px;font-size:13px}
+.doc-body{padding:24px 28px 28px}
+.doc-note{
+  padding:12px 14px;background:#f6f9fc;border-left:3px solid var(--blue);
+  color:#566477;font-size:12px;line-height:1.5;margin-bottom:18px
+}
+.doc-footer{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:18px;margin-top:24px
+}
+.sign{
+  border-top:1px solid #bfc8d4;padding-top:8px;color:#768497;font-size:11px
+}
+.sign b{display:block;color:#283548;margin-top:18px}
+.split{
+  display:grid;grid-template-columns:1.05fr .95fr;gap:18px
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:14px}
+.label{display:block;font-size:12px;color:#67768a;margin-bottom:6px;font-weight:750}
+.input,.select{
+  width:100%;border:1px solid var(--line-strong);background:#fff;
+  border-radius:10px;padding:10px 11px;color:var(--text)
+}
+.upload-strip{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--line)
+}
+.upload-strip:last-child{border-bottom:0}
+.upload-strip strong{display:block;margin-bottom:3px}
+.upload-strip small{color:var(--muted)}
+.material-balance{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  border-top:1px solid var(--line);border-left:1px solid var(--line);
+}
+.balance-cell{
+  padding:15px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)
+}
+.balance-cell span{display:block;color:var(--muted);font-size:11px}
+.balance-cell b{display:block;margin-top:5px;font-size:20px}
+.callout{
+  border-left:4px solid var(--blue);
+  background:#f7faff;padding:14px 16px;color:#4f5f74;
+  line-height:1.55;font-size:13px;border-radius:0 10px 10px 0
+}
+.mobile-nav{display:none}
+.toast{
+  position:fixed;right:20px;bottom:20px;z-index:50;
+  background:#172033;color:#fff;border-radius:10px;padding:11px 14px;
+  box-shadow:0 14px 35px rgba(0,0,0,.2);
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s
+}
+.toast.show{opacity:1;transform:none}
+@media(max-width:1100px){
+  .shell{grid-template-columns:82px minmax(0,1fr)}
+  .side-title,.nav button span:last-child,.side-note{display:none}
+  .nav button{justify-content:center}
+  .stepper{grid-template-columns:repeat(2,1fr)!important}
+  .step:nth-child(2n){border-right:0}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi:nth-child(2){border-right:0}
+  .split{grid-template-columns:1fr}
+  .material-balance{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .topbar{height:58px;padding:0 14px}
+  .brand small,.user span{display:none}
+  .shell{display:block}
+  .sidebar{display:none}
+  .content{padding:18px 13px 88px}
+  .stepper,.kpis,.doc-meta,.doc-footer,.form-row,.material-balance{grid-template-columns:1fr}
+  .step,.kpi{border-right:0;border-bottom:1px solid var(--line)}
+  .step:last-child,.kpi:last-child{border-bottom:0}
+  .file-row{grid-template-columns:1fr}
+  .section-head{flex-direction:column;align-items:flex-start}
+  .doc-title{flex-direction:column}
+  .doc-code{text-align:left}
+  .doc-head,.doc-body{padding-left:18px;padding-right:18px}
+  .mobile-nav{
+    display:flex;position:fixed;left:10px;right:10px;bottom:10px;z-index:40;
+    background:rgba(255,255,255,.95);backdrop-filter:blur(12px);
+    border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:var(--shadow)
+  }
+  .mobile-nav button{
+    flex:1;border:0;background:transparent;color:#657386;
+    padding:9px 6px;border-radius:9px;font-size:10px;font-weight:850
+  }
+  .mobile-nav button.active{background:var(--blue-soft);color:var(--blue)}
+  .toast{left:14px;right:14px;bottom:78px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">M</div>
+      <div><b>MaterialFlow</b><small>MVP · Ingeniería + materiales</small></div>
+    </div>
+    <div class="user"><span>Proyecto demo: Planta Industrial Norte</span><div class="avatar">JM</div></div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="side-title">Flujo MVP</div>
+      <nav class="nav">
+        <button class="active" data-view="planes"><span class="num">1</span><span>Planos</span></button>
+        <button data-view="bom"><span class="num">2</span><span>Lista de materiales</span></button>
+        <button data-view="requisitions"><span class="num">3</span><span>Requisiciones IA</span></button>
+        <button data-view="purchase"><span class="num">4</span><span>Órdenes de compra</span></button>
+        <button data-view="supplier"><span class="num">5</span><span>Entrega proveedor</span></button>
+        <button data-view="warehouse"><span class="num">6</span><span>Almacén</span></button>
+        <button data-view="balance"><span class="num">7</span><span>Balance y reportes</span></button>
+      </nav>
+
+      <div class="side-note">
+        <b>Idea del MVP</b>
+        El sistema parte de varios planos, consolida materiales, genera requisiciones, registra órdenes de compra, incorpora ETA y vía del adjudicado y controla recepción, calidad y entrega desde almacén.
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="content">
+
+        <section class="view active" id="planes">
+          <div class="hero">
+            <div class="eyebrow">Paso 1 · Ingeniería</div>
+            <h1>Subir planos y extraer materiales.</h1>
+            <p class="lead">El usuario carga varios archivos por disciplina. La IA identifica materiales, normaliza códigos y prepara una lista por plano y otra consolidada para toda la obra.</p>
+          </div>
+
+          <div class="stepper" style="grid-template-columns:repeat(7,1fr)">
+            <div class="step active"><small>01</small><b>Planos</b></div>
+            <div class="step"><small>02</small><b>Lista consolidada</b></div>
+            <div class="step"><small>03</small><b>Requisiciones IA</b></div>
+            <div class="step"><small>04</small><b>Orden de compra</b></div>
+            <div class="step"><small>05</small><b>Entrega proveedor</b></div>
+            <div class="step"><small>06</small><b>Almacén</b></div>
+            <div class="step"><small>07</small><b>Balance</b></div>
+          </div>
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h3>Planos del proyecto</h3>
+                <p>Electricidad, mecánica, tuberías, instrumentación u otras disciplinas.</p>
+              </div>
+              <button class="btn primary" id="chooseFiles">Agregar planos</button>
+            </div>
+            <div class="section-body">
+              <div class="dropzone">
+                <strong>Arrastra o selecciona archivos de ingeniería</strong>
+                <p>Demo conceptual: DWG / DXF. El navegador no procesa CAD realmente; aquí se simula el flujo del producto.</p>
+                <button class="btn secondary" id="chooseFiles2">Seleccionar archivos</button>
+                <input type="file" id="fileInput" accept=".dwg,.dxf" multiple>
+              </div>
+
+              <div class="file-list" id="fileList">
+                <div class="file-row">
+                  <div><div class="file-name">ELE-N1-ILUMINACION.dwg</div><div class="file-meta">Nivel 1 · Rev.04</div></div>
+                  <div><span class="discipline">Electricidad</span></div>
+                  <div><span class="status ok">Procesado</span></div>
+                </div>
+                <div class="file-row">
+                  <div><div class="file-name">MEC-N1-EQUIPOS.dwg</div><div class="file-meta">Nivel 1 · Rev.02</div></div>
+                  <div><span class="discipline">Mecánica</span></div>
+                  <div><span class="status ok">Procesado</span></div>
+                </div>
+                <div class="file-row">
+                  <div><div class="file-name">TUB-N1-LINEAS.dwg</div><div class="file-meta">Área proceso · Rev.03</div></div>
+                  <div><span class="discipline">Tuberías</span></div>
+                  <div><span class="status warn">2 revisiones</span></div>
+                </div>
+                <div class="file-row">
+                  <div><div class="file-name">INS-N1-INSTRUMENTOS.dwg</div><div class="file-meta">Área proceso · Rev.02</div></div>
+                  <div><span class="discipline">Instrumentación</span></div>
+                  <div><span class="status ok">Procesado</span></div>
+                </div>
+              </div>
+
+              <div style="display:flex;justify-content:flex-end;margin-top:16px">
+                <button class="btn primary" data-go="bom">Generar lista consolidada →</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="bom">
+          <div class="hero">
+            <div class="eyebrow">Paso 2 · Documento principal</div>
+            <h2>Lista de Materiales de la obra</h2>
+            <p class="lead">Se puede consultar por disciplina, plano o material, y exportar como documento formal.</p>
+          </div>
+
+          <div class="stepper" style="grid-template-columns:repeat(7,1fr)">
+            <div class="step"><small>01</small><b>Planos</b></div>
+            <div class="step active"><small>02</small><b>Lista consolidada</b></div>
+            <div class="step"><small>03</small><b>Requisiciones IA</b></div>
+            <div class="step"><small>04</small><b>Orden de compra</b></div>
+            <div class="step"><small>05</small><b>Entrega proveedor</b></div>
+            <div class="step"><small>06</small><b>Almacén</b></div>
+            <div class="step"><small>07</small><b>Balance</b></div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi"><span>Planos procesados</span><b>18</b></div>
+            <div class="kpi"><span>Materiales únicos</span><b>164</b></div>
+            <div class="kpi"><span>Ítems consolidados</span><b>8.436</b></div>
+            <div class="kpi"><span>Revisión humana</span><b style="color:var(--amber)">11</b></div>
+          </div>
+
+          <div class="toolbar">
+            <div class="tabs">
+              <button class="tab active" data-filter="Todos">Todos</button>
+              <button class="tab" data-filter="Electricidad">Electricidad</button>
+              <button class="tab" data-filter="Mecánica">Mecánica</button>
+              <button class="tab" data-filter="Tuberías">Tuberías</button>
+              <button class="tab" data-filter="Instrumentación">Instrumentación</button>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn secondary" id="exportBom">Exportar PDF</button>
+              <button class="btn primary" id="toggleDoc">Ver documento</button>
+            </div>
+          </div>
+
+          <section class="section" id="bomTableSection">
+            <div class="section-body">
+              <div class="table-wrap">
+                <table id="bomTable">
+                  <thead>
+                    <tr>
+                      <th>Disciplina</th>
+                      <th>Código</th>
+                      <th>Descripción</th>
+                      <th>Plano</th>
+                      <th>Unidad</th>
+                      <th>Cantidad</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr data-disc="Electricidad"><td>Electricidad</td><td class="code">EL-LUM-LED-150-IP65</td><td>Luminaria LED industrial 150W</td><td>ELE-N1-ILUMINACION</td><td>u</td><td class="qty">180</td><td><span class="status ok">Validado</span></td></tr>
+                    <tr data-disc="Electricidad"><td>Electricidad</td><td class="code">EL-CAB-CU-025</td><td>Cable Cu 2.5 mm²</td><td>Varios</td><td>m</td><td class="qty">3260</td><td><span class="status ok">Validado</span></td></tr>
+                    <tr data-disc="Mecánica"><td>Mecánica</td><td class="code">MC-PMP-075-KW</td><td>Bomba centrífuga 7.5 kW</td><td>MEC-N1-EQUIPOS</td><td>u</td><td class="qty">6</td><td><span class="status ok">Validado</span></td></tr>
+                    <tr data-disc="Tuberías"><td>Tuberías</td><td class="code">PP-CS-04-SCH40</td><td>Tubería acero carbono 4" SCH40</td><td>TUB-N1-LINEAS</td><td>m</td><td class="qty">920</td><td><span class="status warn">Revisar código</span></td></tr>
+                    <tr data-disc="Instrumentación"><td>Instrumentación</td><td class="code">IN-PT-010-BAR</td><td>Transmisor de presión 0–10 bar</td><td>INS-N1-INSTRUMENTOS</td><td>u</td><td class="qty">28</td><td><span class="status ok">Validado</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="doc" id="docView" style="display:none">
+            <div class="doc-head">
+              <div class="doc-title">
+                <div>
+                  <h2>Lista de Materiales</h2>
+                  <p>Planta Industrial Norte · Consolidado multidisciplina</p>
+                </div>
+                <div class="doc-code">
+                  <b>LM-PROY-0001</b>
+                  Rev. 04 · 02 Sep 2026
+                </div>
+              </div>
+              <div class="doc-meta">
+                <div><span>Planos</span><b>18</b></div>
+                <div><span>Disciplinas</span><b>4</b></div>
+                <div><span>Materiales únicos</span><b>164</b></div>
+                <div><span>Ítems</span><b>8.436</b></div>
+              </div>
+            </div>
+            <div class="doc-body">
+              <div class="doc-note">Documento consolidado generado a partir de los planos de ingeniería. Las cantidades se agrupan por código de material y mantienen trazabilidad hacia el plano de origen.</div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Código</th><th>Descripción</th><th>Disciplina</th><th>Plano origen</th><th>Unidad</th><th>Total</th></tr></thead>
+                  <tbody>
+                    <tr><td class="code">EL-LUM-LED-150-IP65</td><td>Luminaria LED industrial 150W</td><td>Electricidad</td><td>ELE-N1-ILUMINACION</td><td>u</td><td class="qty">180</td></tr>
+                    <tr><td class="code">EL-CAB-CU-025</td><td>Cable Cu 2.5 mm²</td><td>Electricidad</td><td>Varios</td><td>m</td><td class="qty">3260</td></tr>
+                    <tr><td class="code">MC-PMP-075-KW</td><td>Bomba centrífuga 7.5 kW</td><td>Mecánica</td><td>MEC-N1-EQUIPOS</td><td>u</td><td class="qty">6</td></tr>
+                    <tr><td class="code">PP-CS-04-SCH40</td><td>Tubería acero carbono 4" SCH40</td><td>Tuberías</td><td>TUB-N1-LINEAS</td><td>m</td><td class="qty">920</td></tr>
+                    <tr><td class="code">IN-PT-010-BAR</td><td>Transmisor de presión 0–10 bar</td><td>Instrumentación</td><td>INS-N1-INSTRUMENTOS</td><td>u</td><td class="qty">28</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="doc-footer">
+                <div class="sign">Preparado por<b>Ingeniería</b></div>
+                <div class="sign">Revisado por<b>Coordinación</b></div>
+                <div class="sign">Emitido a<b>Procura</b></div>
+              </div>
+            </div>
+          </section>
+
+          <div style="display:flex;justify-content:flex-end;margin-top:18px">
+            <button class="btn primary" data-go="requisitions">Generar requisiciones con IA →</button>
+          </div>
+        </section>
+
+
+        <section class="view" id="requisitions">
+          <div class="hero">
+            <div class="eyebrow">Paso 3 · Requisiciones generadas por IA</div>
+            <h2>De la necesidad de ingeniería a una requisición lista para licitar.</h2>
+            <p class="lead">La IA toma los materiales aprobados, agrupa necesidades compatibles y prepara requisiciones con cantidades, especificaciones técnicas, fechas requeridas y trazabilidad hacia los planos.</p>
+          </div>
+
+          <div class="stepper" style="grid-template-columns:repeat(7,1fr)">
+            <div class="step"><small>01</small><b>Planos</b></div>
+            <div class="step"><small>02</small><b>Lista consolidada</b></div>
+            <div class="step active"><small>03</small><b>Requisiciones IA</b></div>
+            <div class="step"><small>04</small><b>Orden de compra</b></div>
+            <div class="step"><small>05</small><b>Entrega proveedor</b></div>
+            <div class="step"><small>06</small><b>Almacén</b></div>
+            <div class="step"><small>07</small><b>Balance</b></div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi"><span>Requisiciones propuestas</span><b>12</b></div>
+            <div class="kpi"><span>Materiales incluidos</span><b>164</b></div>
+            <div class="kpi"><span>Valor referencial</span><b>US$ 1.84M</b></div>
+            <div class="kpi"><span>Pendientes revisión</span><b style="color:var(--amber)">2</b></div>
+          </div>
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h3>Requisiciones propuestas</h3>
+                <p>La IA agrupa materiales por disciplina, proveedor potencial, especificación y fecha requerida.</p>
+              </div>
+              <button class="btn primary" id="generateReq">Generar requisiciones</button>
+            </div>
+            <div class="section-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Req.</th><th>Disciplina</th><th>Descripción</th><th>Ítems</th><th>Fecha requerida</th><th>Valor ref.</th><th>Estado</th></tr></thead>
+                  <tbody>
+                    <tr><td class="code">RQ-EL-0041</td><td>Electricidad</td><td>Iluminación y tomacorrientes</td><td>7</td><td>26 Oct 2026</td><td>US$ 84.300</td><td><span class="status ok">Lista</span></td></tr>
+                    <tr><td class="code">RQ-EL-0042</td><td>Electricidad</td><td>Cables y canalización</td><td>12</td><td>05 Nov 2026</td><td>US$ 126.900</td><td><span class="status ok">Lista</span></td></tr>
+                    <tr><td class="code">RQ-MC-0018</td><td>Mecánica</td><td>Bombas centrífugas</td><td>3</td><td>18 Nov 2026</td><td>US$ 245.000</td><td><span class="status warn">Revisar</span></td></tr>
+                    <tr><td class="code">RQ-IN-0011</td><td>Instrumentación</td><td>Transmisores de presión</td><td>4</td><td>12 Nov 2026</td><td>US$ 43.500</td><td><span class="status ok">Lista</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="callout" style="margin-top:16px">
+                <b style="color:var(--text)">Qué hace la IA aquí:</b><br>
+                toma la Lista de Materiales, evita duplicados, agrupa compras compatibles y genera el borrador de requisición con sus especificaciones. El responsable de ingeniería revisa antes de liberar a licitación.
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h3>RQ-EL-0041 · Vista de requisición</h3>
+                <p>Ejemplo del documento que podría ir al proceso de licitación.</p>
+              </div>
+              <span class="status info">Borrador IA</span>
+            </div>
+            <div class="section-body">
+              <div class="form-row">
+                <div class="field"><label class="label">Disciplina</label><input class="input" value="Electricidad"></div>
+                <div class="field"><label class="label">Fecha requerida en obra</label><input class="input" type="date" value="2026-10-26"></div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label class="label">Centro / área</label><input class="input" value="Edificio B · Nivel 3"></div>
+                <div class="field"><label class="label">Prioridad</label><select class="select"><option>Alta</option><option>Media</option><option>Baja</option></select></div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Código</th><th>Descripción técnica</th><th>Cantidad</th><th>Unidad</th><th>Plano origen</th></tr></thead>
+                  <tbody>
+                    <tr><td class="code">EL-LUM-LED-150-IP65</td><td>Luminaria LED industrial 150W IP65</td><td class="qty">180</td><td>u</td><td>ELE-N1-ILUMINACION</td></tr>
+                    <tr><td class="code">EL-TOM-2P-016-220</td><td>Tomacorriente doble 16A 220V</td><td class="qty">142</td><td>u</td><td>ELE-FZA-N2-009</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-top:15px">
+                <button class="btn success" id="approveReq">Aprobar y enviar a licitación</button>
+              </div>
+            </div>
+          </section>
+
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn primary" data-go="purchase">Ver adjudicación y orden de compra →</button>
+          </div>
+        </section>
+
+        <section class="view" id="purchase">
+          <div class="hero">
+            <div class="eyebrow">Paso 4 · Adjudicación y orden de compra</div>
+            <h2>Lo adjudicado queda convertido en una orden de compra trazable.</h2>
+            <p class="lead">Cuando termina la licitación, el sistema registra el ganador, precio adjudicado, condiciones, fecha requerida y cualquier costo logístico que no haya quedado incluido en la oferta.</p>
+          </div>
+
+          <div class="stepper" style="grid-template-columns:repeat(7,1fr)">
+            <div class="step"><small>01</small><b>Planos</b></div>
+            <div class="step"><small>02</small><b>Lista consolidada</b></div>
+            <div class="step"><small>03</small><b>Requisiciones IA</b></div>
+            <div class="step active"><small>04</small><b>Orden de compra</b></div>
+            <div class="step"><small>05</small><b>Entrega proveedor</b></div>
+            <div class="step"><small>06</small><b>Almacén</b></div>
+            <div class="step"><small>07</small><b>Balance</b></div>
+          </div>
+
+          <div class="split">
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Licitación LT-2026-031</h3>
+                  <p>RQ-EL-0041 · Iluminación y tomacorrientes</p>
+                </div>
+                <span class="status ok">Adjudicada</span>
+              </div>
+              <div class="section-body">
+                <div class="table-wrap">
+                  <table style="min-width:760px">
+                    <thead><tr><th>Licitante</th><th>Oferta</th><th>Plazo</th><th>Flete incluido</th><th>Resultado</th></tr></thead>
+                    <tbody>
+                      <tr><td>ElectroChile</td><td>US$ 83.900</td><td>38 días</td><td>Sí</td><td><span class="status info">2° lugar</span></td></tr>
+                      <tr><td>Global Industrial Supply</td><td>US$ 81.700</td><td>32 días</td><td>No</td><td><span class="status ok">Ganador</span></td></tr>
+                      <tr><td>ProElec</td><td>US$ 86.100</td><td>24 días</td><td>Sí</td><td><span class="status info">3° lugar</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Orden de compra</h3>
+                  <p>Datos principales vinculados a la requisición.</p>
+                </div>
+                <span class="status info">PO-2026-0184</span>
+              </div>
+              <div class="section-body">
+                <div class="form-row">
+                  <div class="field"><label class="label">Proveedor</label><input class="input" value="Global Industrial Supply"></div>
+                  <div class="field"><label class="label">Monto adjudicado</label><input class="input" value="US$ 81.700"></div>
+                </div>
+                <div class="form-row">
+                  <div class="field"><label class="label">Flete incluido</label><select class="select"><option>No</option><option>Sí</option></select></div>
+                  <div class="field"><label class="label">Costo adicional de envío</label><input class="input" value="US$ 4.850"></div>
+                </div>
+                <div class="form-row">
+                  <div class="field"><label class="label">Fecha PO</label><input class="input" type="date" value="2026-09-04"></div>
+                  <div class="field"><label class="label">Fecha requerida</label><input class="input" type="date" value="2026-10-26"></div>
+                </div>
+                <div class="callout">
+                  La orden conserva el vínculo: <b>Plano → Material → Requisición → Licitación → PO</b>. Así cualquier cambio posterior puede mostrar su impacto en compra.
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h3>Materiales de PO-2026-0184</h3>
+                <p>Cantidades adjudicadas y costo total incluyendo logística adicional.</p>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Código</th><th>Descripción</th><th>Cantidad</th><th>Precio material</th><th>Flete asignado</th><th>Total</th></tr></thead>
+                  <tbody>
+                    <tr><td class="code">EL-LUM-LED-150-IP65</td><td>Luminaria LED 150W</td><td>180</td><td>US$ 43.200</td><td>US$ 2.560</td><td class="qty">US$ 45.760</td></tr>
+                    <tr><td class="code">EL-TOM-2P-016-220</td><td>Tomacorriente doble 16A</td><td>142</td><td>US$ 38.500</td><td>US$ 2.290</td><td class="qty">US$ 40.790</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="material-balance" style="grid-template-columns:repeat(4,1fr);margin-top:18px">
+                <div class="balance-cell"><span>Material adjudicado</span><b>US$ 81.700</b></div>
+                <div class="balance-cell"><span>Flete adicional</span><b>US$ 4.850</b></div>
+                <div class="balance-cell"><span>Total PO</span><b>US$ 86.550</b></div>
+                <div class="balance-cell"><span>Variación vs ref.</span><b style="color:var(--green)">+2.7%</b></div>
+              </div>
+            </div>
+          </section>
+
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn primary" data-go="supplier">Registrar información de entrega →</button>
+          </div>
+        </section>
+        <section class="view" id="supplier">
+          <div class="hero">
+            <div class="eyebrow">Paso 5 · Información de entrega del adjudicado</div>
+            <h2>El ganador informa cómo y cuándo llegará la compra.</h2>
+            <p class="lead">El proveedor ganador completa un formato estándar con cantidades despachadas, país de origen, vía, fechas estimadas y costos logísticos adicionales. La IA lo lee y actualiza la orden de compra sin digitación manual.</p>
+          </div>
+
+          <div class="stepper" style="grid-template-columns:repeat(7,1fr)">
+            <div class="step"><small>01</small><b>Planos</b></div>
+            <div class="step"><small>02</small><b>Lista consolidada</b></div>
+            <div class="step"><small>03</small><b>Requisiciones IA</b></div>
+            <div class="step"><small>04</small><b>Orden de compra</b></div>
+            <div class="step active"><small>05</small><b>Entrega proveedor</b></div>
+            <div class="step"><small>06</small><b>Almacén</b></div>
+            <div class="step"><small>07</small><b>Balance</b></div>
+          </div>
+
+          <div class="split">
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Formato estándar de entrega</h3>
+                  <p>Ejemplo de los campos que completaría el adjudicado.</p>
+                </div>
+                <span class="status info">Formato v1</span>
+              </div>
+              <div class="section-body">
+                <div class="form-row">
+                  <div class="field"><label class="label">Orden / referencia</label><input class="input" value="PO-2026-0184"></div>
+                  <div class="field"><label class="label">Proveedor</label><input class="input" value="Global Industrial Supply"></div>
+                </div>
+                <div class="form-row">
+                  <div class="field"><label class="label">País de origen</label><input class="input" value="Alemania"></div>
+                  <div class="field"><label class="label">Vía</label><select class="select"><option>Marítima</option><option>Aérea</option><option>Terrestre</option></select></div>
+                </div>
+                <div class="form-row">
+                  <div class="field"><label class="label">Fecha estimada de salida</label><input class="input" type="date" value="2026-09-18"></div>
+                  <div class="field"><label class="label">Fecha estimada de llegada</label><input class="input" type="date" value="2026-10-21"></div>
+                </div>
+                <div class="form-row">
+                  <div class="field"><label class="label">Costo de envío adicional</label><input class="input" value="US$ 4.850"></div>
+                  <div class="field"><label class="label">Incoterm / condición</label><input class="input" value="FOB"></div>
+                </div>
+                <div class="field"><label class="label">Archivo estándar</label><input class="input" id="supplierFile" type="file" accept=".xlsx,.xls,.csv,.pdf"></div>
+                <div class="callout">La IA buscaría los códigos de material dentro del archivo, cantidades despachadas, fechas y medio de transporte, y los cruzaría con la Lista de Materiales del proyecto.</div>
+                <div style="display:flex;justify-content:flex-end;margin-top:15px">
+                  <button class="btn primary" id="processSupplier">Procesar reporte con IA</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Resultado de lectura</h3>
+                  <p>Vista de lo que la IA cargaría automáticamente.</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div id="supplierResult" style="opacity:.45">
+                  <div class="upload-strip"><div><strong>EL-LUM-LED-150-IP65</strong><small>Luminaria LED industrial</small></div><div><span class="status info">180 u</span></div></div>
+                  <div class="upload-strip"><div><strong>MC-PMP-075-KW</strong><small>Bomba centrífuga</small></div><div><span class="status info">6 u</span></div></div>
+                  <div class="upload-strip"><div><strong>IN-PT-010-BAR</strong><small>Transmisor de presión</small></div><div><span class="status info">20 u</span></div></div>
+                  <div class="upload-strip"><div><strong>Origen / vía</strong><small>Alemania · marítima</small></div><div><span class="status warn">ETA 21 Oct</span></div></div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn primary" data-go="warehouse">Registrar recepción en almacén →</button>
+          </div>
+        </section>
+
+
+        <section class="view" id="warehouse">
+          <div class="hero">
+            <div class="eyebrow">Paso 6 · Manejo de materiales en almacén</div>
+            <h2>Recibir, liberar por calidad y entregar a construcción.</h2>
+            <p class="lead">El almacén trabaja sobre el mismo código de material. La IA lee la nota de entrega del proveedor y la liberación de calidad, actualiza cantidades y bloquea entregas cuando un material aún no está liberado.</p>
+          </div>
+
+          <div class="stepper" style="grid-template-columns:repeat(7,1fr)">
+            <div class="step"><small>01</small><b>Planos</b></div>
+            <div class="step"><small>02</small><b>Lista consolidada</b></div>
+            <div class="step"><small>03</small><b>Requisiciones IA</b></div>
+            <div class="step"><small>04</small><b>Orden de compra</b></div>
+            <div class="step"><small>05</small><b>Entrega proveedor</b></div>
+            <div class="step active"><small>06</small><b>Almacén</b></div>
+            <div class="step"><small>07</small><b>Balance</b></div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi"><span>Recibido en almacén</span><b>5.838</b></div>
+            <div class="kpi"><span>Liberado por calidad</span><b style="color:var(--green)">5.406</b></div>
+            <div class="kpi"><span>En inspección</span><b style="color:var(--amber)">432</b></div>
+            <div class="kpi"><span>Entregado a construcción</span><b style="color:var(--blue)">3.921</b></div>
+          </div>
+
+          <div class="split">
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Recepción de material</h3>
+                  <p>La IA extrae la información desde los documentos cargados.</p>
+                </div>
+                <span class="status info">Recepción RC-00482</span>
+              </div>
+              <div class="section-body">
+                <div class="field">
+                  <label class="label">Nota de entrega del proveedor</label>
+                  <input class="input" id="deliveryNote" type="file" accept=".pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png">
+                </div>
+                <div class="field">
+                  <label class="label">Liberación / inspección de calidad</label>
+                  <input class="input" id="qualityRelease" type="file" accept=".pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png">
+                </div>
+                <div class="callout">
+                  La IA debería obtener como mínimo: <b>código, descripción, cantidad recibida, fecha de llegada, fecha de liberación de calidad y referencia de la orden de compra.</b>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:15px">
+                  <button class="btn primary" id="processWarehouseDocs">Procesar documentos con IA</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Resultado de recepción</h3>
+                  <p>Conciliación automática contra PO y Lista de Materiales.</p>
+                </div>
+              </div>
+              <div class="section-body" id="warehouseResult" style="opacity:.45">
+                <div class="upload-strip">
+                  <div><strong>EL-LUM-LED-150-IP65</strong><small>180 u recibidas · PO-2026-0184</small></div>
+                  <div><span class="status ok">Liberado calidad</span></div>
+                </div>
+                <div class="upload-strip">
+                  <div><strong>MC-PMP-075-KW</strong><small>6 u recibidas · PO-2026-0211</small></div>
+                  <div><span class="status warn">En inspección</span></div>
+                </div>
+                <div class="upload-strip">
+                  <div><strong>IN-PT-010-BAR</strong><small>20 u recibidas · PO-2026-0228</small></div>
+                  <div><span class="status ok">Liberado calidad</span></div>
+                </div>
+                <div class="upload-strip">
+                  <div><strong>Fecha llegada</strong><small>21 Oct 2026 · Puerto / traslado a almacén</small></div>
+                  <div><span class="status info">Registrada</span></div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h3>Inventario disponible en almacén</h3>
+                <p>El estado de calidad determina si el material puede o no entregarse a construcción.</p>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Código</th>
+                      <th>Descripción</th>
+                      <th>Disciplina</th>
+                      <th>Recibido</th>
+                      <th>Liberado</th>
+                      <th>Entregado</th>
+                      <th>Disponible</th>
+                      <th>Calidad</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="code">EL-LUM-LED-150-IP65</td><td>Luminaria LED 150W</td><td>Electricidad</td>
+                      <td>180</td><td>180</td><td>120</td><td class="qty">60</td><td><span class="status ok">Liberado</span></td>
+                    </tr>
+                    <tr>
+                      <td class="code">MC-PMP-075-KW</td><td>Bomba centrífuga 7.5 kW</td><td>Mecánica</td>
+                      <td>6</td><td>0</td><td>0</td><td class="qty">6</td><td><span class="status warn">No liberado</span></td>
+                    </tr>
+                    <tr>
+                      <td class="code">IN-PT-010-BAR</td><td>Transmisor de presión</td><td>Instrumentación</td>
+                      <td>20</td><td>20</td><td>8</td><td class="qty">12</td><td><span class="status ok">Liberado</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <div class="split">
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Entrega a construcción</h3>
+                  <p>Formato de salida desde almacén hacia campo.</p>
+                </div>
+                <span class="status info">ENT-00193</span>
+              </div>
+              <div class="section-body">
+                <div class="form-row">
+                  <div class="field"><label class="label">Código de material</label><select class="select" id="constructionMaterial"><option value="ok">EL-LUM-LED-150-IP65 · Liberado</option><option value="blocked">MC-PMP-075-KW · No liberado</option><option value="ok">IN-PT-010-BAR · Liberado</option></select></div>
+                  <div class="field"><label class="label">Cantidad</label><input class="input" type="number" value="20" min="1"></div>
+                </div>
+                <div class="form-row">
+                  <div class="field"><label class="label">Disciplina</label><input class="input" value="Electricidad"></div>
+                  <div class="field"><label class="label">Fecha de entrega</label><input class="input" type="date" value="2026-10-24"></div>
+                </div>
+                <div class="form-row">
+                  <div class="field"><label class="label">Sitio de instalación</label><select class="select"><option>Subestación A</option><option>Área A</option><option>Área B</option><option>Sala de bombas</option><option>Edificio Administrativo</option><option>Sala de control</option><option>Rack de tuberías</option></select></div>
+                  <div class="field"><label class="label">Plano / referencia</label><input class="input" value="ELE-N1-ILUMINACION"></div>
+                </div>
+                <button class="btn success" id="deliverConstruction">Registrar entrega</button>
+                <div id="constructionMsg" class="callout" style="margin-top:14px;display:none"></div>
+              </div>
+            </section>
+
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Excepción controlada</h3>
+                  <p>Si un material no está liberado por calidad, la entrega queda bloqueada.</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="callout">
+                  <b style="color:var(--text)">Regla:</b> material no liberado = no entregable. Si por necesidad de obra debe entregarse de todos modos, el sistema exige una aprobación formal.
+                </div>
+                <div class="form-row" style="margin-top:14px">
+                  <div class="field"><label class="label">Aprobado por</label><input class="input" id="overrideName" placeholder="Nombre del supervisor o gerente"></div>
+                  <div class="field"><label class="label">Cargo</label><input class="input" id="overrideRole" placeholder="Supervisor / Gerente"></div>
+                </div>
+                <div class="field"><label class="label">Nota de aprobación</label><input class="input" id="overrideNote" placeholder="Motivo de la entrega excepcional"></div>
+                <button class="btn secondary" id="approveOverride">Registrar aprobación excepcional</button>
+              </div>
+            </section>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn primary" data-go="balance">Ver balance y reportes →</button>
+          </div>
+        </section>
+
+        <section class="view" id="balance">
+          <div class="hero">
+            <div class="eyebrow">Paso 7 · Balance y reportes</div>
+            <h2>Qué llegó, qué viene y qué falta comprar.</h2>
+            <p class="lead">Sin entrar todavía en un ERP completo, el MVP ya puede mostrar el balance entre lo requerido por ingeniería y lo reportado por proveedores.</p>
+          </div>
+
+          <div class="stepper" style="grid-template-columns:repeat(7,1fr)">
+            <div class="step"><small>01</small><b>Planos</b></div>
+            <div class="step"><small>02</small><b>Lista consolidada</b></div>
+            <div class="step"><small>03</small><b>Requisiciones IA</b></div>
+            <div class="step"><small>04</small><b>Orden de compra</b></div>
+            <div class="step"><small>05</small><b>Entrega proveedor</b></div>
+            <div class="step"><small>06</small><b>Almacén</b></div>
+            <div class="step active"><small>07</small><b>Balance</b></div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi"><span>Requerido</span><b>8.436</b></div>
+            <div class="kpi"><span>Comprado</span><b style="color:var(--green)">6.982</b></div>
+            <div class="kpi"><span>En tránsito</span><b style="color:var(--blue)">1.144</b></div>
+            <div class="kpi"><span>Falta comprar</span><b style="color:var(--red)">310</b></div>
+          </div>
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h3>Balance por material</h3>
+                <p>Ejemplo del control mínimo que tendría el MVP.</p>
+              </div>
+              <button class="btn secondary" id="downloadBalance">Exportar reporte</button>
+            </div>
+            <div class="section-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Código</th><th>Descripción</th><th>Requerido</th><th>Comprado</th><th>Recibido</th><th>En tránsito</th><th>Falta comprar</th><th>ETA</th></tr></thead>
+                  <tbody>
+                    <tr><td class="code">EL-LUM-LED-150-IP65</td><td>Luminaria LED 150W</td><td class="qty">180</td><td>180</td><td>0</td><td>180</td><td>0</td><td>21 Oct 2026</td></tr>
+                    <tr><td class="code">EL-CAB-CU-025</td><td>Cable Cu 2.5 mm²</td><td class="qty">3260</td><td>2940</td><td>1800</td><td>1140</td><td><span class="status bad">320 m</span></td><td>05 Oct 2026</td></tr>
+                    <tr><td class="code">MC-PMP-075-KW</td><td>Bomba centrífuga 7.5 kW</td><td class="qty">6</td><td>6</td><td>0</td><td>6</td><td>0</td><td>21 Oct 2026</td></tr>
+                    <tr><td class="code">IN-PT-010-BAR</td><td>Transmisor presión</td><td class="qty">28</td><td>20</td><td>0</td><td>20</td><td><span class="status bad">8 u</span></td><td>21 Oct 2026</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="material-balance" style="margin-top:18px">
+                <div class="balance-cell"><span>Origen principal</span><b>Alemania</b></div>
+                <div class="balance-cell"><span>Vía principal</span><b>Marítima</b></div>
+                <div class="balance-cell"><span>Próxima llegada</span><b>05 Oct</b></div>
+                <div class="balance-cell"><span>Materiales con déficit</span><b style="color:var(--red)">2</b></div>
+                <div class="balance-cell"><span>Planos afectados</span><b>4</b></div>
+              </div>
+            </div>
+          </section>
+
+
+          <section class="section">
+            <div class="section-head">
+              <div>
+                <h3>Reportes de materiales</h3>
+                <p>Filtros operacionales para ingeniería, almacén y construcción.</p>
+              </div>
+              <button class="btn secondary" id="generateReport">Generar reporte</button>
+            </div>
+            <div class="section-body">
+              <div class="form-row">
+                <div class="field">
+                  <label class="label">Tipo de reporte</label>
+                  <select class="select" id="reportType">
+                    <option>Inventario total por tipo de material</option>
+                    <option>Por disciplina</option>
+                    <option>Por sitio de instalación</option>
+                    <option>Fechas estimadas y vía de llegada</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="label">Filtro</label>
+                  <select class="select">
+                    <option>Todos</option>
+                    <option>Cables</option>
+                    <option>Transformadores</option>
+                    <option>Medidores de flujo</option>
+                    <option>Bridas</option>
+                    <option>Electricidad</option>
+                    <option>Mecánica</option>
+                    <option>Instrumentación</option>
+                    <option>Tuberías</option>
+                    <option>Área A</option>
+                    <option>Subestación A</option>
+                    <option>Sala de bombas</option>
+                    <option>Marítima</option>
+                    <option>Aérea</option>
+                    <option>Terrestre</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Material / Grupo</th>
+                      <th>Disciplina</th>
+                      <th>Sitio</th>
+                      <th>Requerido</th>
+                      <th>Recibido</th>
+                      <th>Disponible</th>
+                      <th>Por llegar</th>
+                      <th>ETA</th>
+                      <th>Vía</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Cables</td><td>Electricidad</td><td>Subestación A</td><td>3260 m</td><td>1800 m</td><td>620 m</td><td>1140 m</td><td>05 Oct</td><td>Marítima</td></tr>
+                    <tr><td>Luminarias</td><td>Electricidad</td><td>Edificio B</td><td>180 u</td><td>180 u</td><td>60 u</td><td>0</td><td>—</td><td>—</td></tr>
+                    <tr><td>Bombas</td><td>Mecánica</td><td>Sala de bombas</td><td>6 u</td><td>6 u</td><td>6 u*</td><td>0</td><td>—</td><td>—</td></tr>
+                    <tr><td>Transmisores</td><td>Instrumentación</td><td>Área A</td><td>28 u</td><td>20 u</td><td>12 u</td><td>0</td><td>—</td><td>—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style="color:var(--muted);font-size:12px;margin:10px 0 0">* Disponible físicamente, pero no entregable mientras calidad no lo libere.</p>
+            </div>
+          </section>
+
+          <div class="callout">
+            <b style="color:var(--text)">Este sería el límite razonable del MVP.</b><br>
+            El MVP ya cubre extracción desde múltiples planos, Lista de Materiales consolidada, requisiciones generadas por IA, adjudicación y orden de compra, información de entrega del ganador, recepción en almacén, liberación por calidad, entrega a construcción y reportes de balance. La planificación avanzada de construcción puede venir después.
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<nav class="mobile-nav">
+  <button class="active" data-view="planes">Planos</button>
+  <button data-view="bom">Lista</button>
+  <button data-view="requisitions">Req.</button>
+  <button data-view="purchase">PO</button>
+  <button data-view="supplier">Entrega</button>
+  <button data-view="warehouse">Almacén</button>
+  <button data-view="balance">Reportes</button>
+</nav>
+
+<div class="toast" id="toast">Acción completada</div>
+
+<script>
+const views=[...document.querySelectorAll('.view')];
+const navButtons=[...document.querySelectorAll('[data-view]')];
+const toast=document.getElementById('toast');
+
+function showToast(msg){
+  toast.textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(window.__toast);
+  window.__toast=setTimeout(()=>toast.classList.remove('show'),1800);
+}
+function go(id){
+  views.forEach(v=>v.classList.toggle('active',v.id===id));
+  navButtons.forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+navButtons.forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+
+const fileInput=document.getElementById('fileInput');
+document.getElementById('chooseFiles').addEventListener('click',()=>fileInput.click());
+document.getElementById('chooseFiles2').addEventListener('click',()=>fileInput.click());
+
+fileInput.addEventListener('change',()=>{
+  const list=document.getElementById('fileList');
+  [...fileInput.files].slice(0,8).forEach((file,i)=>{
+    const row=document.createElement('div');
+    row.className='file-row';
+    const discs=['Electricidad','Mecánica','Tuberías','Instrumentación'];
+    const d=discs[i%discs.length];
+    row.innerHTML='<div><div class="file-name">'+file.name+'</div><div class="file-meta">Archivo agregado por el usuario</div></div><div><span class="discipline">'+d+'</span></div><div><span class="status info">Listo para IA</span></div>';
+    list.appendChild(row);
+  });
+  if(fileInput.files.length) showToast(fileInput.files.length+' plano(s) agregado(s)');
+});
+
+document.querySelectorAll('.tab[data-filter]').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab[data-filter]').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const f=tab.dataset.filter;
+    document.querySelectorAll('#bomTable tbody tr').forEach(row=>{
+      row.style.display=(f==='Todos'||row.dataset.disc===f)?'':'none';
+    });
+  });
+});
+
+document.getElementById('toggleDoc').addEventListener('click',()=>{
+  const table=document.getElementById('bomTableSection');
+  const doc=document.getElementById('docView');
+  const showing=doc.style.display!=='none';
+  doc.style.display=showing?'none':'block';
+  table.style.display=showing?'block':'none';
+  document.getElementById('toggleDoc').textContent=showing?'Ver documento':'Ver tabla';
+});
+
+document.getElementById('generateReq').addEventListener('click',()=>showToast('12 requisiciones generadas desde la Lista de Materiales'));
+document.getElementById('approveReq').addEventListener('click',()=>showToast('RQ-EL-0041 aprobada y lista para licitación'));
+
+
+document.getElementById('processWarehouseDocs').addEventListener('click',()=>{
+  document.getElementById('warehouseResult').style.opacity='1';
+  showToast('Nota de entrega y liberación de calidad procesadas');
+});
+
+let warehouseOverrideApproved=false;
+
+document.getElementById('approveOverride').addEventListener('click',()=>{
+  const name=document.getElementById('overrideName').value.trim();
+  const role=document.getElementById('overrideRole').value.trim();
+  const note=document.getElementById('overrideNote').value.trim();
+  if(!name || !role || !note){
+    showToast('Completa nombre, cargo y nota de aprobación');
+    return;
+  }
+  warehouseOverrideApproved=true;
+  showToast('Aprobación excepcional registrada');
+});
+
+document.getElementById('deliverConstruction').addEventListener('click',()=>{
+  const select=document.getElementById('constructionMaterial');
+  const msg=document.getElementById('constructionMsg');
+  const blocked=select.value==='blocked';
+  msg.style.display='block';
+
+  if(blocked && !warehouseOverrideApproved){
+    msg.style.borderLeftColor='var(--red)';
+    msg.style.background='var(--red-soft)';
+    msg.style.color='var(--red)';
+    msg.innerHTML='<b>Entrega bloqueada.</b> El material todavía no está liberado por calidad. Para una excepción se requiere aprobación de supervisor o gerente.';
+    return;
+  }
+
+  msg.style.borderLeftColor='var(--green)';
+  msg.style.background='var(--green-soft)';
+  msg.style.color='var(--green)';
+  msg.innerHTML=blocked
+    ? '<b>Entrega excepcional registrada.</b> Se guardó la aprobación, responsable, cargo, fecha y nota asociada.'
+    : '<b>Entrega registrada.</b> El inventario de almacén y el balance de construcción fueron actualizados.';
+});
+
+document.getElementById('generateReport').addEventListener('click',()=>{
+  showToast('Reporte generado según filtros seleccionados');
+});
+
+document.getElementById('processSupplier').addEventListener('click',()=>{
+  document.getElementById('supplierResult').style.opacity='1';
+  showToast('Reporte leído y cruzado con la Lista de Materiales');
+});
+
+document.getElementById('exportBom').addEventListener('click',()=>showToast('Documento preparado para exportación'));
+document.getElementById('downloadBalance').addEventListener('click',()=>showToast('Reporte de balance preparado'));
+</script>
+</body>
+</html>

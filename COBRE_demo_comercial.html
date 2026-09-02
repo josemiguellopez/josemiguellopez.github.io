@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>COBRÉ — Demo comercial paso a paso</title>
+<style>
+:root{
+  --bg:#f3f7f5;
+  --surface:#ffffff;
+  --ink:#102018;
+  --muted:#687870;
+  --line:#dfe8e3;
+  --g:#1dbf73;
+  --gd:#0d8851;
+  --soft:#e7f8ef;
+  --dark:#0b2016;
+  --lime:#b8ed3f;
+  --warn:#f3b544;
+  --danger:#df6e5f;
+  --shadow:0 22px 70px rgba(12,47,29,.13);
+  --r:24px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;scroll-behavior:smooth}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 8% 0,#ddf7e9 0,transparent 24%),
+    radial-gradient(circle at 100% 4%,#e9efff 0,transparent 20%),
+    var(--bg);
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  position:sticky;top:0;z-index:50;height:70px;
+  background:rgba(243,247,245,.90);backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(223,232,227,.85);
+  display:flex;align-items:center;justify-content:space-between;padding:0 26px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brandmark{
+  width:42px;height:42px;border-radius:14px;background:var(--dark);color:var(--lime);
+  display:grid;place-items:center;font-weight:950;box-shadow:0 8px 24px rgba(11,32,22,.15)
+}
+.brandname{font-size:24px;font-weight:950;letter-spacing:-.05em}
+.brandname b{color:var(--gd)}
+.brandsub{font-size:11px;color:var(--muted);margin-top:1px}
+.actions{display:flex;gap:8px}
+.btn{
+  border:0;border-radius:13px;padding:10px 14px;font-weight:850;
+  background:var(--g);color:white;box-shadow:0 10px 22px rgba(29,191,115,.17)
+}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:white;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.btn.dark{background:var(--dark);color:white}
+.btn.small{padding:8px 10px;font-size:12px}
+.progress-shell{width:min(1180px,calc(100% - 32px));margin:22px auto 0}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.progress-top strong{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gd)}
+.progress-top span{font-size:11px;color:var(--muted)}
+.progress{height:6px;background:#dce8e2;border-radius:999px;overflow:hidden}
+.progressbar{height:100%;width:11.11%;background:linear-gradient(90deg,var(--g),var(--lime));transition:.3s}
+.dots{display:flex;justify-content:space-between;margin-top:10px}
+.dot{
+  width:27px;height:27px;border-radius:50%;border:1px solid var(--line);
+  background:white;color:#84928c;display:grid;place-items:center;font-size:10px;font-weight:900
+}
+.dot.active{border-color:var(--g);color:var(--gd);box-shadow:0 0 0 5px var(--soft)}
+.dot.done{background:var(--soft);color:var(--gd);border-color:#c3ebd5}
+.stage{flex:1;display:grid;place-items:center;padding:22px 26px 18px}
+.slide{
+  display:none;width:min(1180px,100%);
+  grid-template-columns:.92fr 1.08fr;gap:48px;align-items:center;
+  animation:in .25s ease
+}
+.slide.active{display:grid}
+@keyframes in{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kicker{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gd);font-weight:900;
+}
+.kicker:before{content:"";width:8px;height:8px;background:var(--g);border-radius:50%;box-shadow:0 0 0 5px var(--soft)}
+.copy h1{font-size:clamp(44px,5vw,70px);line-height:.96;letter-spacing:-.06em;margin:16px 0}
+.copy h1 span{color:var(--gd)}
+.copy p{font-size:17px;line-height:1.58;color:#53645b;max-width:600px}
+.promise{
+  margin-top:20px;background:var(--dark);color:white;border-radius:22px;padding:18px 20px;box-shadow:var(--shadow)
+}
+.promise small{color:#a8c5b6;text-transform:uppercase;letter-spacing:.11em;font-size:10px}
+.promise strong{display:block;font-size:18px;margin-top:6px}
+.promise .lime{color:var(--lime)}
+.list{display:grid;gap:9px;margin-top:17px}
+.li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#45574e}
+.tick{
+  width:21px;height:21px;border-radius:7px;background:var(--soft);color:var(--gd);
+  display:grid;place-items:center;font-weight:950;flex:0 0 auto
+}
+.visual-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:30px;padding:22px;box-shadow:var(--shadow);
+  min-height:610px;position:relative;overflow:hidden
+}
+.visual-card.dark{background:linear-gradient(145deg,#143a29,#071a11);color:white;border:0}
+.visual-card:before{
+  content:"";position:absolute;width:260px;height:260px;border-radius:50%;
+  background:rgba(29,191,115,.08);right:-80px;top:-100px;pointer-events:none
+}
+.browser{
+  border:1px solid var(--line);border-radius:18px;background:#f9fbfa;overflow:hidden
+}
+.browserbar{height:36px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 11px}
+.browserbar i{width:8px;height:8px;border-radius:50%;background:#d3ddd8}.browserbar i:first-child{background:#88dcae}.browserurl{margin-left:10px;font-size:10px;color:#85958e}
+.manual-auto{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.process{border-radius:20px;padding:15px;border:1px solid var(--line)}
+.process.bad{background:#fff7f5}.process.good{background:#f2fff8}
+.process h3{margin:0 0 12px;font-size:15px}
+.timeline{display:grid;gap:7px}
+.t{
+  background:rgba(255,255,255,.85);border:1px solid rgba(223,232,227,.95);
+  border-radius:11px;padding:9px 10px;font-size:11px;display:flex;gap:8px;align-items:center
+}
+.n{width:21px;height:21px;border-radius:7px;background:#f0f3f1;display:grid;place-items:center;font-size:9px;font-weight:900}
+.good .n{background:var(--soft);color:var(--gd)}
+.phone{
+  width:350px;min-height:570px;margin:auto;border-radius:31px;border:7px solid #11261c;background:#eef5f1;
+  box-shadow:0 24px 70px rgba(11,32,22,.20);overflow:hidden;position:relative
+}
+.phone-top{
+  height:69px;background:#075e54;color:white;padding:18px 13px 8px;display:flex;align-items:center;gap:9px
+}
+.avatar{width:34px;height:34px;border-radius:50%;background:white;color:var(--gd);display:grid;place-items:center;font-weight:950}
+.phone-top strong{font-size:12px}.phone-top small{display:block;font-size:9px;color:#b8e3d2;margin-top:2px}
+.chat{
+  padding:14px 11px;min-height:440px;display:flex;flex-direction:column;gap:9px;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(29,191,115,.06),transparent 30%),
+    #edf3ef
+}
+.msg{font-size:11px;line-height:1.4;padding:9px 10px;border-radius:12px;max-width:83%;box-shadow:0 1px 1px rgba(0,0,0,.05)}
+.msg.me{align-self:flex-end;background:#d8f8e5;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:white;border-bottom-left-radius:4px}
+.msg time{display:block;font-size:8px;text-align:right;color:#82918a;margin-top:4px}
+.product{
+  align-self:flex-start;max-width:86%;border:1px solid var(--line);background:white;border-radius:14px;padding:10px;display:grid;grid-template-columns:48px 1fr;gap:9px
+}
+.pic{border-radius:10px;background:linear-gradient(145deg,#173325,#1dbf73);color:white;display:grid;place-items:center;font-size:24px}
+.product b{font-size:10px}.product span{font-size:9px;color:var(--muted);display:block;margin-top:3px}
+.detected{
+  margin-top:12px;background:white;border:1px solid var(--line);border-radius:18px;padding:14px
+}
+.detected strong{display:block;color:var(--gd);font-size:12px;margin-bottom:9px}
+.dline{display:flex;justify-content:space-between;gap:12px;font-size:10px;padding:5px 0}
+.dline.total{border-top:1px solid var(--line);padding-top:8px;margin-top:4px;font-weight:900}
+.trigger-list{display:grid;gap:9px;margin-top:13px}
+.trigger{
+  display:grid;grid-template-columns:37px 1fr auto;gap:10px;align-items:center;
+  padding:11px;border-radius:14px;background:#f8fbf9;border:1px solid var(--line)
+}
+.trico{width:35px;height:35px;border-radius:11px;background:var(--soft);display:grid;place-items:center}
+.trigger strong{display:block;font-size:11px}.trigger span{font-size:9px;color:var(--muted)}
+.trigger b{font-size:9px;color:var(--gd)}
+.checkout{
+  width:360px;margin:auto;background:white;border:1px solid var(--line);border-radius:25px;padding:17px;box-shadow:var(--shadow)
+}
+.checkout h3{margin:0 0 13px;font-size:15px}
+.checkout .totalmoney{font-size:30px;font-weight:950;color:var(--gd);text-align:right;margin:10px 0}
+.method{border:1px solid var(--line);border-radius:13px;padding:11px;display:flex;justify-content:space-between;align-items:center;font-size:11px;background:#f9fbfa}
+.paybtn{width:100%;border:0;border-radius:12px;background:var(--g);color:white;padding:12px;font-weight:900;margin-top:11px}
+.paybtn:disabled{opacity:.65}
+.secure{font-size:9px;color:var(--muted);text-align:center;margin-top:8px}
+.confirmed{text-align:center;padding:20px 10px}
+.okicon{
+  width:76px;height:76px;border-radius:50%;margin:5px auto 14px;background:var(--g);color:white;
+  display:grid;place-items:center;font-size:34px;font-weight:950;box-shadow:0 0 0 12px var(--soft)
+}
+.confirmed h2{margin:0;font-size:25px}.confirmed p{font-size:12px;color:var(--muted)}
+.verifylist{display:grid;gap:8px;margin-top:18px;text-align:left}
+.verify{
+  border:1px solid var(--line);border-radius:13px;padding:10px;background:#f8fbf9;display:grid;grid-template-columns:30px 1fr auto;gap:9px;align-items:center
+}
+.verify .ico{width:29px;height:29px;border-radius:9px;background:var(--soft);display:grid;place-items:center}
+.verify strong{font-size:10px;display:block}.verify span{font-size:9px;color:var(--muted)}
+.verify b{font-size:9px;color:var(--gd)}
+.update-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.update{
+  border:1px solid var(--line);background:white;border-radius:16px;padding:14px;
+  display:flex;gap:10px;align-items:center
+}
+.update i{font-style:normal;width:37px;height:37px;border-radius:12px;background:var(--soft);display:grid;place-items:center}
+.update strong{display:block;font-size:11px}.update span{font-size:9px;color:var(--muted)}
+.dashboard{
+  border:1px solid var(--line);border-radius:22px;background:white;padding:15px;box-shadow:var(--shadow)
+}
+.dash-head{display:flex;justify-content:space-between;align-items:center}
+.dash-head h3{margin:0;font-size:16px}.live{font-size:9px;color:var(--gd);background:var(--soft);padding:5px 7px;border-radius:999px;font-weight:900}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.metric{background:#f7faf8;border:1px solid var(--line);border-radius:14px;padding:10px}
+.metric strong{font-size:20px;display:block}.metric small{font-size:9px;color:var(--muted)}
+.order{border:1px solid var(--line);border-radius:16px;padding:12px}
+.order-top{display:flex;justify-content:space-between;font-size:10px}
+.paid{background:var(--soft);color:var(--gd);padding:4px 7px;border-radius:999px;font-weight:900;font-size:9px}
+.order-product{display:grid;grid-template-columns:45px 1fr auto;gap:9px;align-items:center;margin:11px 0}
+.thumb{height:50px;border-radius:10px;background:linear-gradient(145deg,#173325,#1dbf73);display:grid;place-items:center;color:white}
+.order-product b{font-size:10px}.order-product span{font-size:9px;color:var(--muted);display:block;margin-top:2px}
+.meta{display:grid;gap:5px;font-size:9px;color:var(--muted);padding:9px 0;border-top:1px solid var(--line)}
+.prepare{width:100%;border:0;border-radius:11px;padding:11px;background:var(--g);color:white;font-weight:900}
+.value-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.value{border:1px solid var(--line);background:white;border-radius:17px;padding:14px}
+.value i{font-style:normal;font-size:22px}.value strong{display:block;font-size:12px;margin:8px 0 4px}.value span{font-size:10px;color:var(--muted);line-height:1.45}
+.setup{
+  display:grid;gap:10px;margin-top:14px
+}
+.setup-step{
+  display:grid;grid-template-columns:37px 1fr;gap:10px;align-items:start;
+  border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.07);border-radius:15px;padding:12px
+}
+.setup-step b{width:33px;height:33px;border-radius:11px;background:var(--lime);color:var(--dark);display:grid;place-items:center}
+.setup-step strong{font-size:11px;display:block}.setup-step span{font-size:9px;color:#b7cabf;display:block;margin-top:3px;line-height:1.45}
+.final-quote{font-size:26px;font-weight:950;line-height:1.1;margin:16px 0;color:white}
+.final-quote span{color:var(--lime)}
+.note{
+  margin-top:12px;background:#fff9eb;border:1px solid #f0dbad;border-radius:14px;padding:11px;font-size:10px;color:#79652f
+}
+.navbar{
+  width:min(1180px,calc(100% - 32px));margin:0 auto;padding:0 0 26px;display:flex;justify-content:space-between;align-items:center
+}
+.prev,.next{
+  min-width:130px;border-radius:13px;padding:11px 15px;font-weight:900
+}
+.prev{background:white;border:1px solid var(--line);color:var(--ink)}
+.prev:disabled{opacity:.35;cursor:default}
+.next{border:0;background:var(--dark);color:white}
+.next.done{background:var(--g)}
+.centerlabel{font-size:11px;color:var(--muted)}
+.toast{
+  position:fixed;right:22px;bottom:22px;z-index:100;
+  background:var(--dark);color:white;border-radius:13px;padding:11px 14px;
+  box-shadow:var(--shadow);transform:translateY(80px);opacity:0;transition:.25s;font-size:12px
+}
+.toast.show{transform:none;opacity:1}
+@media(max-width:900px){
+  .slide{grid-template-columns:1fr;gap:26px}.copy{text-align:center}.copy p{margin-left:auto;margin-right:auto}
+  .visual-card{min-height:auto}.manual-auto{grid-template-columns:1fr}.actions{display:none}
+  .stage{padding:18px 16px}.progress-shell,.navbar{width:calc(100% - 24px)}
+}
+@media(max-width:520px){
+  .topbar{padding:0 14px}.phone,.checkout{width:min(100%,350px)}.value-grid,.update-grid{grid-template-columns:1fr}
+  .copy h1{font-size:47px}.prev,.next{min-width:105px;padding:10px}.centerlabel{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandmark">C</div>
+      <div>
+        <div class="brandname">CO<b>BRÉ</b></div>
+        <div class="brandsub">Demo comercial · Venta por WhatsApp</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost small" onclick="restart()">↻ Reiniciar demo</button>
+      <button class="btn dark small" onclick="show(8)">Ver propuesta de servicio</button>
+    </div>
+  </header>
+
+  <div class="progress-shell">
+    <div class="progress-top">
+      <strong>Así funcionaría COBRÉ en tu negocio</strong>
+      <span id="progressText">1 de 9</span>
+    </div>
+    <div class="progress"><div class="progressbar" id="bar"></div></div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <main class="stage">
+
+    <!-- 0 -->
+    <section class="slide active" data-step="0">
+      <div class="copy">
+        <div class="kicker">Propuesta de valor</div>
+        <h1>Vendes por WhatsApp.<br><span>COBRÉ hace el resto.</span></h1>
+        <p>Esta demo muestra una venta real de principio a fin: desde el primer mensaje del cliente hasta que tu tienda recibe un pedido pagado y listo para preparar.</p>
+
+        <div class="promise">
+          <small>La idea en una frase</small>
+          <strong>Tu equipo deja de ser el puente manual entre <span class="lime">WhatsApp, el pago y el pedido.</span></strong>
+        </div>
+
+        <div class="list">
+          <div class="li"><span class="tick">✓</span>El cliente sigue usando WhatsApp como siempre.</div>
+          <div class="li"><span class="tick">✓</span>COBRÉ interpreta la compra y genera el cobro.</div>
+          <div class="li"><span class="tick">✓</span>El pago se valida automáticamente cuando el PSP lo permite.</div>
+          <div class="li"><span class="tick">✓</span>Tu negocio recibe el resultado, no el trabajo manual.</div>
+        </div>
+
+        <button class="btn" style="margin-top:20px" onclick="next()">Ver una venta real →</button>
+      </div>
+
+      <div class="visual-card dark">
+        <div style="position:relative;z-index:2">
+          <div style="font-size:11px;color:#a8c6b7">PEDIDO COMPLETADO · DEMO</div>
+          <div style="font-size:48px;font-weight:950;letter-spacing:-.055em;margin:6px 0">$42.890</div>
+          <div style="color:#79e6a9;font-size:11px">✓ Pago confirmado</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px">
+            <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:13px">
+              <small style="color:#aac0b5">Cliente</small><strong style="display:block;margin-top:5px">Mariana</strong>
+            </div>
+            <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:13px">
+              <small style="color:#aac0b5">Estado</small><strong style="display:block;margin-top:5px;color:var(--lime)">Listo</strong>
+            </div>
+          </div>
+
+          <div style="background:#f7faf8;color:var(--ink);border-radius:20px;padding:14px;margin-top:16px">
+            <div class="msg me" style="margin-left:32px">Hola, quiero el Lattafa Asad. ¿Tienen?</div>
+            <div class="detected">
+              <strong>✨ COBRÉ detectó la compra</strong>
+              <div class="dline"><span>Producto</span><b>Lattafa Asad 100ml</b></div>
+              <div class="dline"><span>Entrega</span><b>Providencia</b></div>
+              <div class="dline total"><span>Total</span><b>$42.890</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 -->
+    <section class="slide" data-step="1">
+      <div class="copy">
+        <div class="kicker">Antes de COBRÉ</div>
+        <h1>El problema no es cobrar.<br><span>Es todo lo que ocurre alrededor.</span></h1>
+        <p>En muchos comercios, la misma persona responde, calcula, envía datos de pago, revisa el comprobante, confirma, descuenta stock y recién después prepara el pedido.</p>
+
+        <div class="promise">
+          <small>Lo que queremos eliminar</small>
+          <strong>Que una venta dependa de que alguien esté <span class="lime">mirando el teléfono y conciliando manualmente.</span></strong>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <div class="manual-auto">
+          <div class="process bad">
+            <h3>😓 Hoy: trabajo manual</h3>
+            <div class="timeline">
+              <div class="t"><span class="n">1</span>Cliente pregunta por WhatsApp</div>
+              <div class="t"><span class="n">2</span>Vendedor responde precio y stock</div>
+              <div class="t"><span class="n">3</span>Envía link o datos de pago</div>
+              <div class="t"><span class="n">4</span>Cliente manda comprobante</div>
+              <div class="t"><span class="n">5</span>Vendedor valida el pago</div>
+              <div class="t"><span class="n">6</span>Actualiza venta / stock</div>
+              <div class="t"><span class="n">7</span>Prepara y despacha</div>
+            </div>
+          </div>
+          <div class="process good">
+            <h3>⚡ Con COBRÉ</h3>
+            <div class="timeline">
+              <div class="t"><span class="n">1</span>Cliente expresa intención</div>
+              <div class="t"><span class="n">2</span>COBRÉ detecta el pedido</div>
+              <div class="t"><span class="n">3</span>Genera el cobro exacto</div>
+              <div class="t"><span class="n">4</span>Cliente paga</div>
+              <div class="t"><span class="n">5</span>PSP confirma automáticamente</div>
+              <div class="t"><span class="n">6</span>Venta + stock se actualizan</div>
+              <div class="t"><span class="n">7</span>Tienda sólo prepara</div>
+            </div>
+          </div>
+        </div>
+        <div class="note">Esta comparación es conceptual: el nivel de automatización final depende de las APIs e integraciones disponibles en el medio de pago del comercio.</div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-step="2">
+      <div class="copy">
+        <div class="kicker">Paso 1 · El gatillo</div>
+        <h1>Todo comienza cuando <span>tu cliente escribe.</span></h1>
+        <p>El cliente no necesita aprender una app nueva ni entrar a un portal. COBRÉ permanece detrás de escena y usa la conversación como inicio de la venta.</p>
+
+        <div class="promise">
+          <small>Principio del producto</small>
+          <strong>Todo lo gatilla el cliente. <span class="lime">COBRÉ reacciona a su intención.</span></strong>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <div class="phone">
+          <div class="phone-top">
+            <div class="avatar">C</div>
+            <div><strong>Perfumería Central</strong><small>● COBRÉ atendiendo</small></div>
+          </div>
+          <div class="chat">
+            <div class="msg me">Hola 👋 ¿Tienen Lattafa Asad 100ml?<time>10:29 ✓✓</time></div>
+            <div class="msg bot">Sí. Quedan 3 unidades y está en <b>$39.900</b>.<time>10:30</time></div>
+            <div class="msg bot">¿Lo quieres con retiro o despacho?<time>10:30</time></div>
+            <div class="msg me">Despacho a Providencia<time>10:31 ✓✓</time></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" data-step="3">
+      <div class="copy">
+        <div class="kicker">Paso 2 · COBRÉ interpreta</div>
+        <h1>Una conversación se convierte en <span>datos de negocio.</span></h1>
+        <p>COBRÉ estructura lo que el cliente dijo: producto, cantidad, precio, entrega, cliente y total. Así la conversación deja de ser sólo texto.</p>
+
+        <div class="list">
+          <div class="li"><span class="tick">✓</span>Producto y cantidad detectados.</div>
+          <div class="li"><span class="tick">✓</span>Precio y stock consultados.</div>
+          <div class="li"><span class="tick">✓</span>Entrega y total calculados.</div>
+          <div class="li"><span class="tick">✓</span>Orden interna creada.</div>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <div class="browser">
+          <div class="browserbar"><i></i><i></i><i></i><div class="browserurl">cobre.app · venta detectada</div></div>
+          <div style="padding:16px">
+            <div class="msg me" style="margin-left:32px">Quiero uno, despacho a Providencia.</div>
+            <div class="detected">
+              <strong>✨ COBRÉ detectó el pedido</strong>
+              <div class="dline"><span>Cliente</span><b>Mariana González</b></div>
+              <div class="dline"><span>Producto</span><b>Lattafa Asad 100ml</b></div>
+              <div class="dline"><span>Cantidad</span><b>1</b></div>
+              <div class="dline"><span>Producto</span><b>$39.900</b></div>
+              <div class="dline"><span>Despacho</span><b>$2.990</b></div>
+              <div class="dline total"><span>Total</span><b>$42.890</b></div>
+            </div>
+
+            <div class="trigger-list">
+              <div class="trigger"><div class="trico">💬</div><div><strong>Cliente confirma</strong><span>“Sí, lo quiero”</span></div><b>TRIGGER</b></div>
+              <div class="trigger"><div class="trico">🛒</div><div><strong>Orden creada</strong><span>#C-00248 · pendiente de pago</span></div><b>AUTO</b></div>
+              <div class="trigger"><div class="trico">💳</div><div><strong>COBRÉ prepara el cobro</strong><span>Monto exacto + referencia de orden</span></div><b>AUTO</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-step="4">
+      <div class="copy">
+        <div class="kicker">Paso 3 · Cobro</div>
+        <h1>COBRÉ genera el <span>pago exacto.</span></h1>
+        <p>El comercio conecta el proveedor que ya utiliza. COBRÉ genera el checkout correspondiente a esa orden y mantiene la relación entre cliente, pedido y pago.</p>
+
+        <div class="promise">
+          <small>Para el comercio</small>
+          <strong>No necesitas convertirte en una fintech. <span class="lime">Tu PSP procesa el dinero; COBRÉ orquesta la venta.</span></strong>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <div class="checkout">
+          <h3>Resumen de tu pedido</h3>
+          <div class="dline"><span>Lattafa Asad 100ml</span><b>$39.900</b></div>
+          <div class="dline"><span>Despacho Providencia</span><b>$2.990</b></div>
+          <div class="dline total"><span>Total a pagar</span><b>$42.890</b></div>
+          <div class="totalmoney">$42.890 CLP</div>
+
+          <div style="font-size:10px;color:var(--muted);margin:8px 0">Método de pago</div>
+          <div class="method"><span>💳 Proveedor configurado</span><b>Webpay / PSP ›</b></div>
+
+          <button class="paybtn" id="payBtn" onclick="pay()">Pagar ahora</button>
+          <div class="secure">🔒 El pago ocurre en infraestructura del proveedor autorizado.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-step="5">
+      <div class="copy">
+        <div class="kicker">Paso 4 · Confirmación</div>
+        <h1>COBRÉ sabe que pagaron <span>sin mirar una captura.</span></h1>
+        <p>La validación principal viene del proveedor de pago mediante API o webhook. COBRÉ puede asociar ese evento a la orden y cerrar la venta automáticamente.</p>
+
+        <div class="list">
+          <div class="li"><span class="tick">✓</span>Estado del pago recibido.</div>
+          <div class="li"><span class="tick">✓</span>Monto asociado a la orden.</div>
+          <div class="li"><span class="tick">✓</span>Evento verificado antes de marcar “pagado”.</div>
+          <div class="li"><span class="tick">✓</span>Sin login manual al banco como flujo principal.</div>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <div class="confirmed">
+          <div class="okicon">✓</div>
+          <h2>Pago confirmado</h2>
+          <p>Pedido #C-00248 · $42.890 CLP</p>
+
+          <div class="verifylist">
+            <div class="verify"><div class="ico">💳</div><div><strong>Proveedor de pago</strong><span>Transacción aprobada</span></div><b>OK</b></div>
+            <div class="verify"><div class="ico">🔐</div><div><strong>Notificación validada</strong><span>Evento asociado a la orden</span></div><b>OK</b></div>
+            <div class="verify"><div class="ico">🧾</div><div><strong>Pedido actualizado</strong><span>PENDING → PAID</span></div><b>OK</b></div>
+            <div class="verify"><div class="ico">🔔</div><div><strong>Tienda notificada</strong><span>Pedido listo para preparar</span></div><b>OK</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-step="6">
+      <div class="copy">
+        <div class="kicker">Paso 5 · Orquestación</div>
+        <h1>Confirmar el pago <span>dispara el negocio.</span></h1>
+        <p>El valor no termina en “pagado”. Ese evento puede actualizar automáticamente las piezas que hoy tu equipo lleva por separado.</p>
+
+        <div class="promise">
+          <small>Evento central</small>
+          <strong>payment.succeeded → <span class="lime">venta + inventario + cliente + pedido + notificación.</span></strong>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <div style="font-size:11px;color:var(--gd);font-weight:900;margin-bottom:10px">COBRÉ ACTUALIZA AUTOMÁTICAMENTE</div>
+        <div class="update-grid">
+          <div class="update"><i>💰</i><div><strong>Venta</strong><span>Registro de $42.890</span></div></div>
+          <div class="update"><i>📦</i><div><strong>Inventario</strong><span>-1 unidad del producto</span></div></div>
+          <div class="update"><i>👤</i><div><strong>Cliente</strong><span>Historial actualizado</span></div></div>
+          <div class="update"><i>🧾</i><div><strong>Pedido</strong><span>Estado: PAID</span></div></div>
+          <div class="update"><i>📈</i><div><strong>Analítica</strong><span>Venta sumada al día</span></div></div>
+          <div class="update"><i>🔔</i><div><strong>Notificación</strong><span>Preparar pedido</span></div></div>
+        </div>
+
+        <div style="margin-top:14px;background:var(--dark);color:white;border-radius:18px;padding:14px">
+          <div style="font-size:9px;color:#a9c2b4">EVENTO LÓGICO</div>
+          <div style="font-size:11px;line-height:1.7;margin-top:5px;color:#d6e4dc">
+            payment.received → verify → order.paid → inventory.decrement → sale.created → merchant.notified
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" data-step="7">
+      <div class="copy">
+        <div class="kicker">Paso 6 · Lo que ve tu equipo</div>
+        <h1>Tu vendedor entra cuando <span>la venta ya existe.</span></h1>
+        <p>En lugar de atender cada pregunta, conciliar cada pago y registrar cada operación, recibe una bandeja de pedidos listos para preparar.</p>
+
+        <div class="promise">
+          <small>Resultado operativo</small>
+          <strong>La primera tarea humana debería ser: <span class="lime">“Preparar pedido”.</span></strong>
+        </div>
+      </div>
+
+      <div class="visual-card">
+        <div class="dashboard">
+          <div class="dash-head"><h3>Hola, Martín 👋</h3><span class="live">● COBRÉ activo</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">Resumen operativo de la tienda</div>
+
+          <div class="metrics">
+            <div class="metric"><strong>12</strong><small>Pedidos pagados</small></div>
+            <div class="metric"><strong style="color:var(--warn)">5</strong><small>Por preparar</small></div>
+            <div class="metric"><strong>2</strong><small>En camino</small></div>
+          </div>
+
+          <div class="order">
+            <div class="order-top"><strong>#C-00248</strong><span class="paid">✓ Pagado</span></div>
+            <div class="order-product">
+              <div class="thumb">🧴</div>
+              <div><b>Lattafa Asad 100ml</b><span>1 unidad</span></div>
+              <b>$42.890</b>
+            </div>
+            <div class="meta">
+              <div>Cliente: Mariana González</div>
+              <div>Entrega: Providencia</div>
+              <div>Pago: proveedor conectado · confirmado</div>
+              <div>Hora: hoy, 10:32</div>
+            </div>
+            <button class="prepare" id="prepareBtn" onclick="prepare()">📦 Preparar pedido</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" data-step="8">
+      <div class="copy">
+        <div class="kicker">Propuesta de servicio</div>
+        <h1>¿Qué recibe <span>tu negocio?</span></h1>
+        <p>COBRÉ se ofrece como una capa de automatización sobre la operación que ya tienes. La meta es cambiar lo mínimo posible para el cliente y reducir trabajo manual para tu equipo.</p>
+
+        <div class="value-grid">
+          <div class="value"><i>💬</i><strong>Venta conversacional</strong><span>Detectar intención, producto, cantidad y datos de entrega.</span></div>
+          <div class="value"><i>💳</i><strong>Orquestación de pagos</strong><span>Generar cobros y asociarlos a cada orden.</span></div>
+          <div class="value"><i>✅</i><strong>Validación automática</strong><span>Confirmar estados desde el PSP cuando su integración lo permite.</span></div>
+          <div class="value"><i>📦</i><strong>Operación de pedidos</strong><span>Entregar la venta pagada al equipo para preparación y despacho.</span></div>
+          <div class="value"><i>◫</i><strong>Inventario</strong><span>Actualizar existencias después de una venta confirmada.</span></div>
+          <div class="value"><i>📊</i><strong>Visibilidad del negocio</strong><span>Ventas, pedidos, clientes y métricas en un único lugar.</span></div>
+        </div>
+      </div>
+
+      <div class="visual-card dark">
+        <div style="position:relative;z-index:2">
+          <div style="font-size:10px;color:var(--lime);font-weight:900;letter-spacing:.12em">IMPLEMENTACIÓN DEL SERVICIO</div>
+          <div class="final-quote">Conectamos COBRÉ a <span>tu forma actual de vender.</span></div>
+          <p style="color:#b7cabf;font-size:12px;line-height:1.55">La implementación se define según tus canales, catálogo, medio de pago y proceso de despacho.</p>
+
+          <div class="setup">
+            <div class="setup-step"><b>1</b><div><strong>Conectamos tu canal</strong><span>WhatsApp Business y la entrada de conversaciones.</span></div></div>
+            <div class="setup-step"><b>2</b><div><strong>Cargamos tu operación</strong><span>Productos, precios, stock, zonas de despacho y reglas.</span></div></div>
+            <div class="setup-step"><b>3</b><div><strong>Integramos tu medio de pago</strong><span>Usamos el PSP disponible para generar y confirmar pagos.</span></div></div>
+            <div class="setup-step"><b>4</b><div><strong>Probamos el flujo end-to-end</strong><span>Mensaje → orden → pago → confirmación → pedido listo.</span></div></div>
+          </div>
+
+          <div style="margin-top:18px;padding:15px;border-radius:17px;background:rgba(184,237,63,.12);border:1px solid rgba(184,237,63,.25)">
+            <div style="font-size:10px;color:#d9f49b">OBJETIVO</div>
+            <strong style="display:block;font-size:17px;margin-top:5px">Que tu equipo venda más tiempo y concilie menos.</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="navbar">
+    <button class="prev" id="prev" onclick="prev()">← Anterior</button>
+    <div class="centerlabel" id="centerLabel">Propuesta de valor</div>
+    <button class="next" id="next" onclick="next()">Siguiente →</button>
+  </footer>
+</div>
+
+<div class="toast" id="toast">Listo</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const labels=[
+  'Propuesta de valor',
+  'Problema actual',
+  'Cliente escribe',
+  'COBRÉ interpreta',
+  'Cobro',
+  'Validación',
+  'Actualización automática',
+  'Pedido listo',
+  'Propuesta de servicio'
+];
+let current=0;
+
+const dots=document.getElementById('dots');
+labels.forEach((label,i)=>{
+  const d=document.createElement('button');
+  d.className='dot';
+  d.textContent=i+1;
+  d.title=label;
+  d.onclick=()=>show(i);
+  dots.appendChild(d);
+});
+
+function render(){
+  slides.forEach((s,i)=>s.classList.toggle('active',i===current));
+  [...dots.children].forEach((d,i)=>{
+    d.classList.toggle('active',i===current);
+    d.classList.toggle('done',i<current);
+  });
+  document.getElementById('bar').style.width=((current+1)/slides.length*100)+'%';
+  document.getElementById('progressText').textContent=`${current+1} de ${slides.length}`;
+  document.getElementById('centerLabel').textContent=labels[current];
+  document.getElementById('prev').disabled=current===0;
+
+  const n=document.getElementById('next');
+  if(current===slides.length-1){
+    n.textContent='Volver al inicio';
+    n.classList.add('done');
+  }else{
+    n.textContent='Siguiente →';
+    n.classList.remove('done');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function show(i){current=Math.max(0,Math.min(i,slides.length-1));render()}
+function next(){current=current===slides.length-1?0:current+1;render()}
+function prev(){if(current>0)current--;render()}
+function restart(){current=0;resetInteractive();render();toast('Demo reiniciada')}
+
+function pay(){
+  const b=document.getElementById('payBtn');
+  b.textContent='Procesando pago...';
+  b.disabled=true;
+  setTimeout(()=>{
+    b.textContent='Pago aprobado ✓';
+    toast('Pago confirmado por el proveedor');
+    setTimeout(()=>show(5),650);
+  },800);
+}
+function prepare(){
+  const b=document.getElementById('prepareBtn');
+  b.textContent='✓ Pedido en preparación';
+  b.style.background='#0d8851';
+  toast('Pedido enviado a preparación');
+  setTimeout(()=>show(8),700);
+}
+function resetInteractive(){
+  const p=document.getElementById('payBtn');
+  if(p){p.textContent='Pagar ahora';p.disabled=false}
+  const pr=document.getElementById('prepareBtn');
+  if(pr){pr.textContent='📦 Preparar pedido';pr.style.background=''}
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800)
+}
+render();
+</script>
+</body>
+</html>
